@@ -1,0 +1,33 @@
+{
+  "name": "CSE3561",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "amqplib": "^0.5.1",
+    "angular-ui-router": "^0.4.2",
+    "body-parser": "^1.15.2",
+    "cassandra-driver": "^3.2.0",
+    "cookie-session": "^2.0.0-beta.1",
+    "crypto": "0.0.3",
+    "crypto-random-string": "^1.0.0",
+    "express": "^4.14.0",
+    "express-fileupload": "^0.1.2",
+    "express-session": "^1.15.1",
+    "morgan": "^1.8.1",
+    "mysql": "^2.13.0",
+    "node-datetime": "^1.0.0",
+    "nodemailer": "^3.1.7",
+    "serve-static": "^1.12.1",
+    "session-file-store": "^1.0.0",
+    "sleep": "^5.1.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

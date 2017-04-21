@@ -1,0 +1,17 @@
+.jumbotron{
+	max-height: 180px;
+	background-image: url("http://cdn.wallpapersafari.com/29/22/UNDju1.jpg");
+}
+
+#jumboText {
+	text-align: center;
+}
+
+
+
+#tweetButton {
+	margin-top: 10px;
+}
+
+.navbar {
+}

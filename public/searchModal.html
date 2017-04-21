@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+<title> TwitterClone </title>
+
+
+
+    <script src="app.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
+<link rel="stylesheet" href="loginPageCSS.css">
+
+
+
+</head>
+
+<body ng-app="app">
+<div>
+        <div class="modal-header">
+            <h3 class="modal-title">Search Options!</h3>
+        </div>
+    <div class="modal-body">
+        <p> Timestamp: Search tweets from this time and earlier </p>
+        <input type="text" class="form-control" ng-model = "timestamp">
+        <p> Limit </p>
+        <input type="text" class="form-control" ng-model = "limit">
+        <p> Search Query </p>
+        <input type="text" class="form-control" ng-model = "q">
+         <p> Username </p>
+        <input type="text" class="form-control" ng-model = "username">
+        <p> Following: Only show tweets that you are following </p>
+        <select ng-model="selectedFollowing" ng-options="x for x in options">
+        </select>
+    </div>
+
+    </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+             <button class="btn btn-primary" ng-click="ok()">OK</button>
+
+        </div>
+
+</div>
+</body>
+
+</html>

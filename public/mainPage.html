@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+<title> Main Page </title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/js/bootstrap.min.js" integrity="sha384-BLiI7JTZm+JWlgKa0M0kGRpJbF2J8q+qreVrKBC47e3K6BW78kGLrCkeRX6I9RoK" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.4.2/angular-ui-router.js"></script> 
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-sanitize.js"></script>
+    <script src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.3.0.js"></script>
+    <script src="app.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
+<link rel="stylesheet" href="mainPage.css">
+
+
+
+</head>
+<body ng-app="app">
+<div>
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <h1 class="display-3" id="jumboText">TwitterClone!</h1>
+  </div>
+</div>
+ <nav class="navbar navbar-default">
+<button type="button" class= "btn btn-outline-secondary"> Log Out </button>
+</nav>
+</div>
+
+
+<div class="row">
+  <div class="col-md-3"> Profile Column</div>
+    <div class="col-md-6"> 
+      <p> {{ lmao }} </p>
+      <div class="container">
+        <textarea class="form-control" rows="3" placeholder="Write a tweet" ng-model="tweet"></textarea>
+        <button type="button" id="tweetButton" class="btn btn-outline-primary" ng-click="item()"> Tweet </button>
+      </div>
+      <hr>
+      <p> Place for Tweets </p>
+</div>
+
+
+<div class="col-md-3"> Trending Column </div>
+</div>
+</body>
+
+</html>

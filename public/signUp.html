@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+<title> TwitterClone </title>
+
+
+
+
+
+
+
+    <script src="app.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
+<link rel="stylesheet" href="loginPageCSS.css">
+
+
+
+</head>
+
+<body ng-app="app">
+<div>
+        <div class="modal-header">
+            <h3 class="modal-title">Sign up to TwitterClone!</h3>
+        </div>
+    <div class="modal-body">
+    <p id="adduserInfo">{{adduserInfo}}</p>
+        <p> Full name </p>
+        <input type="text" class="form-control" ng-model = "adduser.username">
+        <p> Email Address </p>
+        <input type="text" class="form-control" ng-model = "adduser.email">
+        <p> Password </p>
+        <input type="password" class="form-control" ng-model = "adduser.password">
+    </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" ng-click="ok()">OK</button>
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+        </div>
+
+</div>
+</body>
+
+</html>

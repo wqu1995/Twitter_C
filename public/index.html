@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+
+<title> Main Page </title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/js/bootstrap.min.js" integrity="sha384-BLiI7JTZm+JWlgKa0M0kGRpJbF2J8q+qreVrKBC47e3K6BW78kGLrCkeRX6I9RoK" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.4.2/angular-ui-router.js"></script> 
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-sanitize.js"></script>
+    <script src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.3.0.js"></script>
+    <script src="app.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
+<link rel="stylesheet" href="mainPage.css">
+
+
+
+</head>
+
+<body ng-app="app" ng-controller="mainCtrl">
+<div>
+<div class="jumbotron jumbotron-fluid">
+  <div class="container">
+    <h1 class="display-3" id="jumboText">TwitterClone!</h1>
+  </div>
+</div>
+ <nav class="navbar navbar-default">
+<input type="text" placeholder="Delete Tweet by Id" ng-model="deleteTweetId">
+<button type"button" class= "btn btn-outline-secondary" ng-click ="deleteTweet()"> DeleteTweet </button>
+<input type="text" placeholder="User to Follow" ng-model="userToFollow">
+<button type="button" class="btn btn-outline-secondary" ng-click="follow()"> Follow  </button>
+
+<input type="text" placeholder="User to Unfollow" ng-model="userToUnFollow">
+<button type-"button" class="btn btn-outline-secondary" ng-click="unfollow()"> Unfollow  </button>
+
+<input type="text" placeholder=" User To Search" ng-model="userToSearch">
+<button type="button" class="btn btn-outline-secondary" ng-click="searchUser()"> Search User </button>
+
+
+<button type="button" class="btn btn-outline-secondary" ng-click="openSearch()"> Advance Search! </button>
+
+<hr>
+<input type="text" placeholder="Get tweet id" ng-model="tweetId">
+<button type="button" class= "btn btn-outline-secondary" ng-click = "getItem()"> Get Item! </button>
+
+</nav>
+</div>
+
+
+<div class="row">
+  <div class="col-md-3"> 
+  <p>Profile Column</p>
+  <hr>
+  <p> Get a User's Followers </p>
+  <input type="text" ng-model="usernameFollowers"> 
+  <button type="button" class= "btn btn-outline-secondary" ng-click = "getUserFollowers()"> Get Followers! </button>
+  <p> Get a User's Followings </p>
+  <input type="text" ng-model="usernameFollowing">
+  <button type="button" class= "btn btn-outline-secondary" ng-click = "getUserFollowings()"> Get Followings! </button>
+
+
+  </div>
+    <div class="col-md-6"> 
+      <p>News Feed Column </p>
+      <div class="container">
+        <textarea class="form-control" rows="3" placeholder="Write a tweet." ng-model = "tweet"></textarea>
+        <button type="button" id="tweetButton" class="btn btn-outline-primary" ng-click = "additem()"> Tweet </button>
+      </div>
+      <hr>
+      <p> Place for Tweets </p>
+      <ul class="list-group" ng-repeat="tweet in tweets">
+      <li class="list-group-item">
+      <h6> {{tweet.username}} </h6>
+      <p> {{tweet.content}} </p>
+      </li>
+      <ul>
+</div>
+
+
+<div class="col-md-3"> <button type="button" class= "btn btn-outline-secondary" ng-click = "logout()"> LogOut </button>
+ </div>
+</div>
+</body>
+</html>
+
