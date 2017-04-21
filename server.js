@@ -481,10 +481,10 @@ app.post('/searchTweets',function(req,res){
  			})
  		}
  		else if(q != null && following == true && username == null){
- 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT ?',
+ 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT ? allow filtering',
  				[req.session.user, q, newStamp, req.body.limit], function(err, result){
  					if(err){
- 						console.log("472")
+ 						console.log(err)
  						res.send({
  							status: "error",
  							error: err
@@ -502,10 +502,10 @@ app.post('/searchTweets',function(req,res){
  				})
  		}
  		else if(q != null && following ==false && username != null){
- 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT ?'
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT ? allow filtering'
  				[username, q, newStamp, req.body.limit], function(err, result){
  					if(err){
- 						console.log("494")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
@@ -525,10 +525,10 @@ app.post('/searchTweets',function(req,res){
  		}
  		else if(q != null && following ==false && username == null){
  			
- 			cassandraClient.execute('SELECT * FROM Tweets WHERE content LIKE \'%?%\' AND timestamp <= ?  ORDER BY timestamp DESC LIMIT ?', 
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE content LIKE \'%?%\' AND timestamp <= ?  ORDER BY timestamp DESC LIMIT ? allow filtering', 
  				[q, newStamp, req.body.limit], function(err, result){
  					if(err){
- 						console.log("516")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
@@ -553,10 +553,10 @@ app.post('/searchTweets',function(req,res){
  			})
  		}
  		else if(q == null && following == true && username == null){
- 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT ?',
+ 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT ? allow filtering',
  			[req.session.user, newStamp,req.body.limit], function(err, result){
  					if(err){
- 						console.log("545")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
@@ -576,9 +576,9 @@ app.post('/searchTweets',function(req,res){
  		}
  		else if(q == null && following == false && username != null){
  			
- 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT ?',[username, newStamp, req.body.limit],function(err, result){
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT ? allow filtering',[username, newStamp, req.body.limit],function(err, result){
  					if(err){
- 						console.log("568")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
@@ -598,9 +598,9 @@ app.post('/searchTweets',function(req,res){
  		}
  		else if(q == null && following ==false && username == null){
  			
- 			cassandraClient.execute('SELECT * FROM Tweets WHERE timestamp <= ?  ORDER BY timestamp DESC LIMIT ?', [newStamp, req.body.limit], function(err, result){
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE timestamp <= ?  ORDER BY timestamp DESC LIMIT ? allow filtering', [newStamp, req.body.limit], function(err, result){
  					if(err){
- 						console.log("590")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
@@ -626,10 +626,10 @@ app.post('/searchTweets',function(req,res){
  			})
  		}
  		else if(q != null && following == true && username == null){
- 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25',
+ 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25 allow filtering',
  				[req.session.user, q, newStamp],function(err, result){
  					if(err){
- 						console.log("619")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
@@ -648,10 +648,10 @@ app.post('/searchTweets',function(req,res){
  				})
  		}
  		else if(q != null && following ==false && username != null){
- 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25'
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25 allow filtering'
  				[username, q, newStamp],  function(err, result){
  					if(err){
- 						console.log("641")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
@@ -670,10 +670,10 @@ app.post('/searchTweets',function(req,res){
  				})
  		}
  		else if(q != null && following ==false && username == null){
- 			cassandraClient.execute('SELECT * FROM Tweets WHERE content LIKE \'%?%\' AND timestamp <= ?  ORDER BY timestamp DESC LIMIT 25', 
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE content LIKE \'%?%\' AND timestamp <= ?  ORDER BY timestamp DESC LIMIT 25 allow filtering', 
  				[q, newStamp], function(err, result){
  					if(err){
- 						console.log("662")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
@@ -698,10 +698,10 @@ app.post('/searchTweets',function(req,res){
  			})
  		}
  		else if(q == null && following == true && username == null){
- 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25',
+ 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25 allow filtering',
  			[req.session.user, newStamp],function(err, result){
  					if(err){
- 						console.log("690")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
@@ -720,9 +720,9 @@ app.post('/searchTweets',function(req,res){
  				})
  		}
  		else if(q == null && following == false && username != null){
- 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25',[username, newStamp],function(err, result){
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25 allow filtering',[username, newStamp],function(err, result){
  					if(err){
- 						console.log("712")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
@@ -741,9 +741,9 @@ app.post('/searchTweets',function(req,res){
  				})
  		}
  		else if(q == null && following ==false && username == null){
- 			cassandraClient.execute('SELECT * FROM Tweets WHERE timestamp <= ?  ORDER BY timestamp DESC LIMIT 25', [newStamp], function(err, result){
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE timestamp <= ?  ORDER BY timestamp DESC LIMIT 25 allow filtering', [newStamp], function(err, result){
  					if(err){
- 						console.log("733")
+ 						console.log(err)
  
  						res.send({
  							status: "error",
