@@ -261,7 +261,7 @@ app.post('/verify',function(req,res){
 			}
 			else{
 				if(result.rows.length === 1){
-					var query = connection.query('UPDATE Users SET enabled = true WHERE username = ?',[result.rows[0].username],function(err,result){
+					cassandraClient.execute('UPDATE Users SET enabled = true WHERE username = ?',[result.rows[0].username],function(err,result){
 						if(err){
 							res.send({
 								status: "error",
