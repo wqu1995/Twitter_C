@@ -481,9 +481,8 @@ app.post('/searchTweets',function(req,res){
  			})
  		}
  		else if(q != null && following == true && username == null){
- 			connection.query('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ' + mysql.escape(req.session.user)+
- 				' AND content LIKE '+ mysql.escape('%'+q+'%')+ ' AND timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT ' +
- 				mysql.escape(req.body.limit), function(err, result){
+ 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT ?',
+ 				[req.session.user, q, newStamp, req.body.limit], function(err, result){
  					if(err){
  						console.log("472")
  						res.send({
@@ -495,17 +494,16 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
  				})
  		}
  		else if(q != null && following ==false && username != null){
- 			connection.query('SELECT * FROM Tweets WHERE username =' + mysql.escape(username)+
- 				' AND content LIKE '+ mysql.escape('%'+q+'%')+ ' AND timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT ' +
- 				mysql.escape(req.body.limit), function(err, result){
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT ?'
+ 				[username, q, newStamp, req.body.limit], function(err, result){
  					if(err){
  						console.log("494")
  
@@ -518,16 +516,17 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
  				})
  		}
  		else if(q != null && following ==false && username == null){
- 			connection.query('SELECT * FROM Tweets WHERE content LIKE '+ mysql.escape('%'+q+'%')+ ' AND timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT ' +
- 				mysql.escape(req.body.limit), function(err, result){
+ 			
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE content LIKE \'%?%\' AND timestamp <= ?  ORDER BY timestamp DESC LIMIT ?', 
+ 				[q, newStamp, req.body.limit], function(err, result){
  					if(err){
  						console.log("516")
  
@@ -540,8 +539,8 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
@@ -554,9 +553,8 @@ app.post('/searchTweets',function(req,res){
  			})
  		}
  		else if(q == null && following == true && username == null){
- 			connection.query('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ' + mysql.escape(req.session.user)+
- 				' AND timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT ' +
- 				mysql.escape(req.body.limit), function(err, result){
+ 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT ?',
+ 			[req.session.user, newStamp,req.body.limit], function(err, result){
  					if(err){
  						console.log("545")
  
@@ -569,17 +567,16 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
  				})
  		}
  		else if(q == null && following == false && username != null){
- 			connection.query('SELECT * FROM Tweets WHERE username =' + mysql.escape(username)+
- 				' AND timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT ' +
- 				mysql.escape(req.body.limit), function(err, result){
+ 			
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT ?',[username, newStamp, req.body.limit],function(err, result){
  					if(err){
  						console.log("568")
  
@@ -592,15 +589,16 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
  				})
  		}
  		else if(q == null && following ==false && username == null){
- 			connection.query('SELECT * FROM Tweets WHERE timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT ' +mysql.escape(req.body.limit), function(err, result){
+ 			
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE timestamp <= ?  ORDER BY timestamp DESC LIMIT ?', [newStamp, req.body.limit], function(err, result){
  					if(err){
  						console.log("590")
  
@@ -613,8 +611,8 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
@@ -628,8 +626,8 @@ app.post('/searchTweets',function(req,res){
  			})
  		}
  		else if(q != null && following == true && username == null){
- 			connection.query('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ' + mysql.escape(req.session.user)+
- 				' AND content LIKE '+ mysql.escape('%'+q+'%')+ ' AND timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT 25', function(err, result){
+ 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25',
+ 				[req.session.user, q, newStamp],function(err, result){
  					if(err){
  						console.log("619")
  
@@ -642,16 +640,16 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
  				})
  		}
  		else if(q != null && following ==false && username != null){
- 			connection.query('SELECT * FROM Tweets WHERE username =' + mysql.escape(username)+
- 				' AND content LIKE '+ mysql.escape('%'+q+'%')+ ' AND timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT 25', function(err, result){
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND content LIKE \'%?%\' AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25'
+ 				[username, q, newStamp],  function(err, result){
  					if(err){
  						console.log("641")
  
@@ -664,15 +662,16 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
  				})
  		}
  		else if(q != null && following ==false && username == null){
- 			connection.query('SELECT * FROM Tweets WHERE content LIKE '+ mysql.escape('%'+q+'%')+ ' AND timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT 25', function(err, result){
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE content LIKE \'%?%\' AND timestamp <= ?  ORDER BY timestamp DESC LIMIT 25', 
+ 				[q, newStamp], function(err, result){
  					if(err){
  						console.log("662")
  
@@ -685,8 +684,8 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
@@ -699,8 +698,8 @@ app.post('/searchTweets',function(req,res){
  			})
  		}
  		else if(q == null && following == true && username == null){
- 			connection.query('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ' + mysql.escape(req.session.user)+
- 				' AND timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT 25', function(err, result){
+ 			cassandraClient.execute('SELECT T.* FROM Tweets T, Following F WHERE T.username = F.User2 AND F.User1 = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25',
+ 			[req.session.user, newStamp],function(err, result){
  					if(err){
  						console.log("690")
  
@@ -713,16 +712,15 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
  				})
  		}
  		else if(q == null && following == false && username != null){
- 			connection.query('SELECT * FROM Tweets WHERE username =' + mysql.escape(username)+
- 				' AND timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT 25', function(err, result){
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE username = ? AND timestamp <= ? ORDER BY timestamp DESC LIMIT 25',[username, newStamp],function(err, result){
  					if(err){
  						console.log("712")
  
@@ -735,15 +733,15 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
  				})
  		}
  		else if(q == null && following ==false && username == null){
- 			connection.query('SELECT * FROM Tweets timestamp <= '+mysql.escape(newStamp)+ ' ORDER BY timestamp DESC LIMIT 25', function(err, result){
+ 			cassandraClient.execute('SELECT * FROM Tweets WHERE timestamp <= ?  ORDER BY timestamp DESC LIMIT 25', [newStamp], function(err, result){
  					if(err){
  						console.log("733")
  
@@ -756,8 +754,8 @@ app.post('/searchTweets',function(req,res){
  							status: "OK",
  							items: []
  						}
- 						for(var i = 0; i< result.length; i++){
- 							response.items.push(JSON.parse(JSON.stringify(result[i])))
+ 						for(var i = 0; i< result.rows.length; i++){
+ 							response.items.push(JSON.parse(JSON.stringify(result.rows[i])))
  						}
  						res.send(response);
  					}
