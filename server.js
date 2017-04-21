@@ -823,7 +823,7 @@ app.delete('/item/:id',function(req,res){
 
 app.get('/user/:username',function(req,res){
 	var email, follower, following;
-	cassandraClient.execute('SELECT email FROM Users WHERE username = ?',[req.params.username], function(err,result){
+	cassandraClient.execute('SELECT email FROM Users WHERE username = ? allow filtering',[req.params.username], function(err,result){
 		if(err){
 			res.send({
 					status: "error",
@@ -831,7 +831,7 @@ app.get('/user/:username',function(req,res){
 			})
 		}else{
 			email = result.rows[0].email;
-			cassandraClient.execute('SELECT COUNT(User2) AS Following FROM Following WHERE User1 = ?',[req.params.username], function(err, result){
+			cassandraClient.execute('SELECT COUNT(User2) AS Following FROM Following WHERE User1 = ? allow filtering',[req.params.username], function(err, result){
 				if(err){
 					res.send({
 					status: "error",
@@ -839,7 +839,7 @@ app.get('/user/:username',function(req,res){
 				})
 				}else{
 					following = result.rows[0].Following;
-					cassandraClient.execute('SELECT COUNT(User1) AS Follower FROM Following WHERE User2 = ?',[req.params.username], function(err, result){
+					cassandraClient.execute('SELECT COUNT(User1) AS Follower FROM Following WHERE User2 = ? allow filtering',[req.params.username], function(err, result){
 						if(err){
 							res.send({
 					status: "error",
