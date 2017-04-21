@@ -332,7 +332,7 @@ app.post('/verify',function(req,res){
 					Key: {
 						"username": data.username
 					},
-					UpdateExpression: "set enabled = :t"
+					UpdateExpression: "set enabled = :t",
 					ExpressionAttributeValues:{
 						":t": "true"
 					}
