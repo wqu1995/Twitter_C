@@ -20,7 +20,7 @@ var exchange = 'twitter';
 var AWS =require("aws-sdk");
 
 AWS.config.update({
-    region: "us-east-2",
+    region: "us-east-1",
    // endpoint: "http://localhost:8000"
 });
 var docClient = new AWS.DynamoDB.DocumentClient();
@@ -124,7 +124,7 @@ app.post('/adduser', function(req,res){
 	var hash = crypto.createHash('md5').update(req.body.email).digest('hex');
 	var post = [req.body.username,req.body.password,req.body.email,false,hash];
 	var params = {
-		TableName: 'Users'.
+		TableName: 'Users',
 		Item:{
 			'username': req.body.username,
 			'password': req.body.password,
@@ -1073,6 +1073,6 @@ app.get('/media/:id',function(req,res){
 })
 
 
-app.listen(8080, "172.31.25.137",function(){
+app.listen(8080, "172.31.64.118",function(){
 	console.log("Server listening on port " + 9000);
 })
