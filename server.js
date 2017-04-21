@@ -13,7 +13,7 @@ var mongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const dateTime = Date.now();
 var fileupload = require('express-fileupload');
-//var cassandra = require('cassandra-driver');
+var cassandra = require('cassandra-driver');
 var amqp = require('amqplib/callback_api');
 var amqpConn, chan;
 var exchange = 'twitter';
@@ -33,15 +33,15 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 	console.log("connected to amqp");
 })*/
 
-/*var cassandraClient = new cassandra.Client({
-	contactPoints: ['54.164.116.15'],
+var cassandraClient = new cassandra.Client({
+	contactPoints: ['13.58.73.62'],
 	keyspace: 'twitter'
 },function(err){
 	if(err)
 		console.log(err);
 	else
 		console.log("connected to cassandra")
-})*/
+})
 
 //var url = 'mongodb://52.90.176.234:27017/twitter';
 //var url = 'mongodb://localhost:27017/twitter';
@@ -864,7 +864,46 @@ app.post('/searchTweets',function(req,res){
  	}
  })
 
+app.post('/item/:id/like',function(req,res){
+	//console.log('in here');
+	if(req.body.like == true){
+		//console.log("in true");
+		cassandraClient.execute('UPDATE Tweets SET like = like + 1 WHERE id = ?',[req.params.id],function(err,result){
+			if(err){
+				var jsonToSend = {
+					status: "error"
+				}
+				res.send(jsonToSend);
+			}
+			else{
+				var jsonToSend = {
+					status: "OK"
+				}
+				res.send(jsonToSend);
+			}
+		})
+	}else if(req.body.like == false){
+		console.log("in false");
 
+		cassandraClient.execute('UPDATE Tweets SET like = like - 1 WHERE id = ?',[req.params.id],function(err,result){
+			if(err){
+				var jsonToSend = {
+					status: "error"
+				}
+				res.send(jsonToSend);
+			}
+			else{
+				var jsonToSend = {
+					status: "OK"
+				}
+				res.send(jsonToSend);
+			}
+		})
+	}
+	else{
+		res.send("???")
+	}
+})
 
 app.delete('/item/:id',function(req,res){
 	//console.log(req.params.id);
@@ -920,7 +959,73 @@ app.delete('/item/:id',function(req,res){
 
 app.get('/user/:username',function(req,res){
 	var email, follower, following;
-	cassandraClient.execute('SELECT email FROM Users WHERE username = ? allow filtering',[req.params.username], function(err,result){
+	var params = {
+		TableName: "Users",
+		FilterExpression: "#username = :username",
+		ExpressionAttributeNames:{
+			"#username": "username"
+		},
+		ExpressionAttributeValues:{
+			":username": req.params.username
+		}
+	}
+
+	docClient.scan(params, function(err,data){
+		if(err){
+			console.log(err)
+		}else{
+			email = data.Items[0].email;
+			var params ={
+				TableName: "Following",
+				Limit : req.body.limit,
+				FilterExpression: "#user2 = :user2",
+				ExpressionAttributeNames:{
+					"#user2" : "user2"
+				},
+				ExpressionAttributeValues:{
+					":user2": req.params.username
+				}
+			}
+			docClient.scan(params,function(err, data){
+				if(err){
+					console.log(err);
+				}else{
+					following = data.Items.length
+
+					var params ={
+						TableName: "Following",
+						Limit : req.body.limit,
+						FilterExpression: "#user1 = :user1",
+						ExpressionAttributeNames:{
+							"#user1" : "user1"
+						},
+						ExpressionAttributeValues:{
+							":user1": req.params.username
+						}
+					}
+					docClient.scan(params,function(err, data){
+						follower = data.Items.length;
+						if(err){
+							console.log(err);
+						}else{
+							var response = {
+									email : email,
+									followers : follower,
+									following : following
+								}
+							res.send({
+								status: "OK",
+								user: response
+							})
+						}
+				})
+
+				}
+			})
+
+		}
+	})
+	/*cassandraClient.execute('SELECT email FROM Users WHERE username = ? allow filtering',[req.params.username], function(err,result){
 		if(err){
 			res.send({
 					status: "error",
@@ -963,13 +1068,34 @@ app.get('/user/:username',function(req,res){
 				}
 			})
 		}
-	})
+	})*/
 })
 
 app.get('/user/:username/followers',function(req,res){
 	//console.log(req.params.username)
 	if(req.body.limit != null && req.body.limit != ""){
-		cassandraClient.execute('SELECT User1 From Following where User2 =? LIMIT ? allow filtering', [req.params.username, req.body.limit] ,function(err,result){
+		var params ={
+			TableName: "Following",
+			Limit : req.body.limit,
+			FilterExpression: "#user2 = :user2",
+			ExpressionAttributeNames:{
+				"#user2" : "user2"
+			},
+			ExpressionAttributeValues:{
+				":user2": req.params.username
+			}
+		}
+		docClient.scan(params,function(err, data){
+			if(err){
+				console.log(err);
+			}else{
+				res.send({
+					status: "OK",
+					users: data.Items.length
+				})
+			}
+		})
+		/*cassandraClient.execute('SELECT User1 From Following where User2 =? LIMIT ? allow filtering', [req.params.username, req.body.limit] ,function(err,result){
 			if(err){
 				console.log(err);
 			}
@@ -977,10 +1103,10 @@ app.get('/user/:username/followers',function(req,res){
 				//console.log(result)
 				res.send({status:"OK"});
 			}
-		})
+		})*/
 	}
 	else{
-		cassandraClient.execute('SELECT User1 From Following where User2 = ? LIMIT 50 allow filtering',[req.params.username], function(err,result){
+		/*cassandraClient.execute('SELECT User1 From Following where User2 = ? LIMIT 50 allow filtering',[req.params.username], function(err,result){
 			if(err){
 				console.log(err);
 			}
@@ -990,6 +1116,27 @@ app.get('/user/:username/followers',function(req,res){
 					users: result.rows
 				}
 				res.send(response);
+			}
+		})*/
+				var params ={
+			TableName: "Following",
+			Limit : 50,
+			FilterExpression: "#user2 = :user2",
+			ExpressionAttributeNames:{
+				"#user2" : "user2"
+			},
+			ExpressionAttributeValues:{
+				":user2": req.params.username
+			}
+		}
+		docClient.scan(params,function(err, data){
+			if(err){
+				console.log(err);
+			}else{
+				res.send({
+					status: "OK",
+					users: data.Items.length
+				})
 			}
 		})
 	}
@@ -998,7 +1145,28 @@ app.get('/user/:username/followers',function(req,res){
 app.get('/user/:username/following',function(req,res){
 	//console.log(req.params.username)
 	if(req.body.limit != null && req.body.limit != ""){
-		cassandraClient.execute('SELECT User2 From Following where User1 = ? LIMIT ? allow filtering', [req.params.username, req.body.limit],function(err,result){
+		var params ={
+			TableName: "Following",
+			Limit : req.body.limit,
+			FilterExpression: "#user1 = :user1",
+			ExpressionAttributeNames:{
+				"#user1" : "user1"
+			},
+			ExpressionAttributeValues:{
+				":user1": req.params.username
+			}
+		}
+		docClient.scan(params,function(err, data){
+			if(err){
+				console.log(err);
+			}else{
+				res.send({
+					status: "OK",
+					users: data.Items.length
+				})
+			}
+		})
+		/*cassandraClient.execute('SELECT User2 From Following where User1 = ? LIMIT ? allow filtering', [req.params.username, req.body.limit],function(err,result){
 			if(err){
 				console.log(err);
 			}
@@ -1006,10 +1174,31 @@ app.get('/user/:username/following',function(req,res){
 				//console.log(result)
 				res.send({status:"OK"});
 			}
-		})
+		})*/
 	}
 	else{
-		cassandraClient.execute('SELECT User2 From Following where User1 = ? LIMIT 50 allow filtering',[req.params.username], function(err,result){
+				var params ={
+			TableName: "Following",
+			Limit : 50,
+			FilterExpression: "#user1 = :user1",
+			ExpressionAttributeNames:{
+				"#user1" : "user1"
+			},
+			ExpressionAttributeValues:{
+				":user1": req.params.username
+			}
+		}
+		docClient.scan(params,function(err, data){
+			if(err){
+				console.log(err);
+			}else{
+				res.send({
+					status: "OK",
+					users: data.Items.length
+				})
+			}
+		})
+		/*cassandraClient.execute('SELECT User2 From Following where User1 = ? LIMIT 50 allow filtering',[req.params.username], function(err,result){
 			if(err){
 				console.log(err);
 			}
@@ -1020,58 +1209,34 @@ app.get('/user/:username/following',function(req,res){
 				}
 				res.send(response);
 			}
-		})
+		})*/
 	}
 })
 
-app.post('/item/:id/like',function(req,res){
-	//console.log('in here');
-	if(req.body.like == true){
-		//console.log("in true");
-		cassandraClient.execute('UPDATE Tweets SET like = like + 1 WHERE id = ?',[req.params.id],function(err,result){
-			if(err){
-				var jsonToSend = {
-					status: "error"
-				}
-				res.send(jsonToSend);
-			}
-			else{
-				var jsonToSend = {
-					status: "OK"
-				}
-				res.send(jsonToSend);
-			}
-		})
-	}else if(req.body.like == false){
-		console.log("in false");
 
-		cassandraClient.execute('UPDATE Tweets SET like = like - 1 WHERE id = ?',[req.params.id],function(err,result){
-			if(err){
-				var jsonToSend = {
-					status: "error"
-				}
-				res.send(jsonToSend);
-			}
-			else{
-				var jsonToSend = {
-					status: "OK"
-				}
-				res.send(jsonToSend);
-			}
-		})
-	}
-	else{
-		res.send("???")
-	}
-})
 
 
 
 app.post('/follow',function(req,res){
 	//console.log(req.body);
 	if(req.body.follow == true){
+		var params = {
+			TableName: "Following",
+			Item: {
+				"user1": req.session.user,
+				"user2": req.body.username
+			}
+		};
+
+		docClient.put(params,function(err,data){
+			if(err){
+				console.log(err);
+			}else{
+				res.send({status: "OK"});
+			}
+		})
 		//console.log("TRUE???")
-		cassandraClient.execute('INSERT INTO Following (User1, User2) VALUES (?, ?)', [req.session.user, req.body.username], function(err,result){
+	/*cassandraClient.execute('INSERT INTO Following (User1, User2) VALUES (?, ?)', [req.session.user, req.body.username], function(err,result){
 		if(err){
 			console.log(err);
 			res.send({
@@ -1082,11 +1247,30 @@ app.post('/follow',function(req,res){
 		else{
 			res.send({status: "OK"});
 		}
-	})
+	})*/
 	}
 	else{
+
+		var params = {
+			TableName: "Following",
+			Key:{
+				"user1": req.session.user
+			},
+			ConditionExpression: "user2 = :user2",
+			ExpressionAttributeValues:{
+				":user2": req.body.username
+			}
+		}
+
+		docClient.delete(params, function(err,data){
+			if(err){
+				console.log(err);
+			}else{
+				res.send({status: "OK"});
+			}
+		})
 		//console.log("FOLLOW IS NOT TRUE");
-		cassandraClient.execute('DELETE FROM Following WHERE User1 = ? AND User2 = ?', [req.session.user, req.body.username], function(err,result){
+		/*cassandraClient.execute('DELETE FROM Following WHERE User1 = ? AND User2 = ?', [req.session.user, req.body.username], function(err,result){
 			if(err){
 				res.send({
 				status: "error",
@@ -1096,13 +1280,33 @@ app.post('/follow',function(req,res){
 				//console.log(req.session.user +'has unfollow '+req.body.username);
 				res.send({status: "OK"});
 			}
-		})
+		})*/
 	}
 })
 
 app.post('/addmedia', function(req,res){
+
+
 	var id = crypto.createHash('md5').update(req.files.content.name+cryptoRandomString(10)).digest('hex');
 	var data = [id, req.files.content.data];
+	/*var params = {
+		TableName: "Media",
+		Item:{
+			"id": id,
+			"content": data 
+		}
+	}
+
+	docClient.put(params, function(err,data){
+		if(err){
+			console.log(err)
+		}else{
+			res.send({
+				status: "OK",
+				id: id
+			})
+		}
+	})*/
 	cassandraClient.execute('INSERT INTO Media (id, content) VALUES (?, ?)',data, function(err, result){
 		if(err){
 			res.send({
@@ -1122,8 +1326,28 @@ app.post('/addmedia', function(req,res){
 
 app.get('/media/:id',function(req,res){
 	//console.log(req.params.id);
+	/*var params = {
+		TableName: "Media",
+		KeyConditionExpression: "#id = :id",
+		ExpressionAttributeNames: {
+			"#id": "id" 
+		},
+		ExpressionAttributeValues:{
+			":id": req.params.id
+		}
+	}
+
+	docClient.query(params, function(err,data){
+		if(err){
+			console(err);
+		}else{
+			res.writeHead(200,{'content-type': 'image/png'});
+			res.write(new Buffer(data.Items[0].content), 'binary');
+			res.end();
+		}
+	})*/
 	var query = 'SELECT content FROM Media WHERE id = ?';
-	var par = [req.params.id.toString()];
+	var par = [req.params.id]
 	cassandraClient.execute(query, par, function(err,result){
 		if(err){
 			res.send({
