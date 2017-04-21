@@ -309,8 +309,42 @@ app.get('/verify',function(req,res){
 	}*/
 })
 app.post('/verify',function(req,res){
-	console.log([req.body.email, req.body.key])
+	//console.log([req.body.email, req.body.key])
 	if(req.body.key === 'abracadabra'){
+		var params = {
+			TableName: 'Users',
+			ProjectionExpressionL: "username",
+			FilterExpression: "#em = :em",
+			ExpressionAttributeNames:{
+				"#em" : "email"
+			},
+			ExpressionAttributeValues:{
+				":em" : req.body.email
+			}
+		}
+		docClient.scan(params, function(err, data){
+			if(err){
+				console.log(err)
+			}
+			else{
+				var params = {
+					TableName: 'Users',
+					Key: {
+						"username": data.username
+					},
+					UpdateExpression: "set enabled = true",
+				},
+				docClient.update(params, function(err,result){
+					if(err){
+						console.log(err);
+					}else{
+						res.send({
+							status : "OK"
+						})
+					}
+				})
+			}
+		})
 		cassandraClient.execute('SELECT username FROM Users WHERE email = ? ALLOW FILTERING', [req.body.email],function(err,result){
 			if(err){
 				res.send({
