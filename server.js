@@ -329,7 +329,7 @@ app.post('/verify',function(req,res){
 				console.log(err)
 			}
 			else{
-				console.log(data);
+				//console.log(data);
 				var params = {
 					TableName: 'Users',
 					Key: {
@@ -425,71 +425,89 @@ app.post('/additem', function(req,res){
 		})
 	}
 	else{
-	/*	mongoClient.connect(url,function(err,db){
-	assert.equal(null,err);
-	//console.log(req.body);
-	
-	var newDoc = {
-		content: req.body.content,
-		parent: req.body.parent,
-		username: req.session.user,
-		timestamp: timestamp
-	}
-	db.collection('tweets').insertOne(newDoc,function(err,result){
-		assert.equal(null,err);
-		db.close();
-		var resultToSend = {
-			status: "OK",
-			id: newDoc._id,
-		}
-		res.send(resultToSend);
-	})
-})*/
-//console.log('in add item')
-/*	if(req.body.content.substring(0,3)=="RT "){
-		connection.query('SELECT id FROM Tweets where content = '+ mysql.escape(req.body.content.substring(3,req.body.content.length)), function(err,result){
-			if(err){
-				console.log("in additem error");
-			}else{
-				connection.query('UPDATE Data SET RTCounter = RTCounter +1 WHERE id = '+mysql.escape(result[0].id),function(err,result){
-					if(err){
-						console.log("in additem error2");
-					}
-				})
-			}
-		})
-		/*connection.query('UPDATE Tweets SET RTCounter = RTCounter + 1 WHERE content = ' + 
-			mysql.escape(req.body.content.substring(3,req.body.content.length)), function(err,result){
-				if(err){
-					console.log(err);
-				}
-			})
-	}*/
+
 var timestamp = Math.floor(dateTime/1000);	
 var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString(10)).digest('hex');
-		var post;
+		
+		var params;
 		if(req.body.parent != null && req.body.parent != ""){
 			if(req.body.media !=null && req.body.media != ""){
-				post = [postid,req.body.content,req.session.user,timestamp,req.body.parent,req.body.media.toString(),0]
-
+			//	post = [postid,req.body.content,req.session.user,timestamp,req.body.parent,req.body.media.toString(),0]
+				params = {
+					TableName: "Tweets",
+					Item:{
+						"id": postid,
+						"content": req.body.content,
+						"username": req.session.user,
+						"timestamp": timestamp,
+						"parent": req.body.parent,
+						"media": req.body.media,
+						"likes": 0
+					}
+				}
 			}
 			else{
-				post = [postid,req.body.content,req.session.user,timestamp,req.body.parent,null,0]
+			//	post = [postid,req.body.content,req.session.user,timestamp,req.body.parent,null,0]
+				params = {
+					TableName: "Tweets",
+					Item:{
+						"id": postid,
+						"content": req.body.content,
+						"username": req.session.user,
+						"timestamp": timestamp,
+						"parent": req.body.parent,
+						"media": " ",
+						"likes": 0
+					}
+				}
+
 			}
 		}
 			
 		else{
 			if(req.body.media !=null && req.body.media != ""){
-				post = [postid,req.body.content,req.session.user,timestamp,null,req.body.media.toString(),0]
+				//post = [postid,req.body.content,req.session.user,timestamp,null,req.body.media.toString(),0]
+				params = {
+					TableName: "Tweets",
+					Item:{
+						"id": postid,
+						"content": req.body.content,
+						"username": req.session.user,
+						"timestamp": timestamp,
+						"parent": " ",
+						"media": req.body.media,
+						"likes": 0
+					}
+				}
 
 			}
 			else{
-				post = [postid,req.body.content,req.session.user,timestamp,null,null,0]
+				//post = [postid,req.body.content,req.session.user,timestamp,null,null,0]
+				params = {
+					TableName: "Tweets",
+					Item:{
+						"id": postid,
+						"content": req.body.content,
+						"username": req.session.user,
+						"timestamp": timestamp,
+						"parent": " ",
+						"media": " ",
+						"likes": 0
+					}
+				}
 
 			}
 		}
-
-		cassandraClient.execute('INSERT INTO Tweets (id, content, username, timestamp, parent, media, likes) VALUES (?,?,?,?,?,?,?)', post,function(err, result){
+		docClient.put(params, function(err,data){
+			if(err){
+				console.log(err);
+			}else{
+				res.send({
+					status: "OK"
+				})
+			}
+		})
+		/*cassandraClient.execute('INSERT INTO Tweets (id, content, username, timestamp, parent, media, likes) VALUES (?,?,?,?,?,?,?)', post,function(err, result){
 			if(err){
 				console.log(post);
 				console.log(err);
@@ -503,13 +521,36 @@ var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString
 					id: postid
 				})
 			}
-		})
+		})*/
 	}
 
 })
 
 app.get('/item/:id',function(req,res){
-	cassandraClient.execute('SELECT * FROM Tweets WHERE id = ?',[req.params.id], function(err,result){
+
+	var params = {
+		TableName: "Tweets",
+		KeyConditionExpression: "#id = :id",
+		ExpressionAttributeNames:{
+			"#id": id
+		},
+		ExpressionAttributeValues:{
+			":id": req.params.id
+		}
+	}
+
+	docClient.query(params,function(err,data){
+		if(err){
+			console.log(err);
+		}
+		else{
+			res.send({
+				status: "OK",
+				item: data.Items[0]
+			})
+		}
+	})
+	/*cassandraClient.execute('SELECT * FROM Tweets WHERE id = ?',[req.params.id], function(err,result){
 		if(err){
 			console.log(err)
 			res.send({
@@ -531,7 +572,7 @@ app.get('/item/:id',function(req,res){
 				})
 		}
 		}
-	})
+	})*/
 })
 
 app.get('/getAllTweets',function(req,res){
@@ -867,8 +908,27 @@ app.post('/searchTweets',function(req,res){
 app.post('/item/:id/like',function(req,res){
 	//console.log('in here');
 	if(req.body.like == true){
+		var params = {
+			TableName: "Tweets",
+			Key:{
+				"id": req.params.id
+			},
+			UpdateExpression: "set likes = likes + :x",
+			ExpressionAttributeValues:{
+				":x": 1
+			}
+		}
+		docClient.update(params, function(err,data){
+			if(err){
+				console.log(err);
+			}else{
+				res.send({
+					status: "OK"
+				});
+			}
+		})
 		//console.log("in true");
-		cassandraClient.execute('UPDATE Tweets SET like = like + 1 WHERE id = ?',[req.params.id],function(err,result){
+		/*cassandraClient.execute('UPDATE Tweets SET like = like + 1 WHERE id = ?',[req.params.id],function(err,result){
 			if(err){
 				var jsonToSend = {
 					status: "error"
@@ -881,11 +941,29 @@ app.post('/item/:id/like',function(req,res){
 				}
 				res.send(jsonToSend);
 			}
-		})
+		})*/
 	}else if(req.body.like == false){
 		console.log("in false");
-
-		cassandraClient.execute('UPDATE Tweets SET like = like - 1 WHERE id = ?',[req.params.id],function(err,result){
+		var params = {
+			TableName: "Tweets",
+			Key:{
+				"id": req.params.id
+			},
+			UpdateExpression: "set likes = likes - :x",
+			ExpressionAttributeValues:{
+				":x": 1
+			}
+		}
+		docClient.update(params, function(err,data){
+			if(err){
+				console.log(err);
+			}else{
+				res.send({
+					status: "OK"
+				});
+			}
+		})
+		/*cassandraClient.execute('UPDATE Tweets SET like = like - 1 WHERE id = ?',[req.params.id],function(err,result){
 			if(err){
 				var jsonToSend = {
 					status: "error"
@@ -898,7 +976,7 @@ app.post('/item/:id/like',function(req,res){
 				}
 				res.send(jsonToSend);
 			}
-		})
+		})*/
 	}
 	else{
 		res.send("???")
@@ -926,7 +1004,30 @@ app.delete('/item/:id',function(req,res){
 	})
 })*/
 //console.log("in delete item")
-	cassandraClient.execute('SELECT media FROM Tweets WHERE id = ?',[req.params.id], function(err,result){
+	var params = {
+		TableName : "Tweets",
+		KeyConditionExpression: "#id = :id",
+		ExpressionAttributeNames:{
+			"#id": "id",
+		},
+		ExpressionAttributeValues:{
+			":id": req.params.id
+		}
+	}
+	docClient.query(params, function(err,data){
+		if(err){
+			console.log(err);
+		}else{
+			if(data.Items[0].media != null && data.Items[0].media != " "){
+				cassandraClient.execute('DELETE FROM Media WHERE id = ?', [data.Items[0].media],function(err,result){
+					if(err){
+						console.log(err)
+					}
+				})
+			}
+		}
+	})
+	/*cassandraClient.execute('SELECT media FROM Tweets WHERE id = ?',[req.params.id], function(err,result){
 		if(err){
 			res.send({
 				status: "error",
@@ -942,8 +1043,23 @@ app.delete('/item/:id',function(req,res){
 				})
 			}
 		}
+	})*/
+	var params = {
+		TableName : "Tweets",
+		Key: {
+			"id": req.params.id
+		}
+	}
+	docClient.delete(params, function(err,data){
+		if(err){
+			console.log(err);
+		}else{
+			res.send({
+				status :"OK"
+			})
+		}
 	})
-	cassandraClient.execute('DELETE FROM Tweets WHERE id = ?',[req.params.id], function(err,result){
+	/*cassandraClient.execute('DELETE FROM Tweets WHERE id = ?',[req.params.id], function(err,result){
 		if(err){
 			res.send({
 				status : "error",
@@ -954,7 +1070,7 @@ app.delete('/item/:id',function(req,res){
 				status : "OK"
 			})
 		}
-	})
+	})*/
 })
 
 app.get('/user/:username',function(req,res){
@@ -1091,7 +1207,7 @@ app.get('/user/:username/followers',function(req,res){
 			}else{
 				res.send({
 					status: "OK",
-					users: data.Items.length
+					users: data.Items
 				})
 			}
 		})
@@ -1135,7 +1251,7 @@ app.get('/user/:username/followers',function(req,res){
 			}else{
 				res.send({
 					status: "OK",
-					users: data.Items.length
+					users: data.Items
 				})
 			}
 		})
@@ -1162,7 +1278,7 @@ app.get('/user/:username/following',function(req,res){
 			}else{
 				res.send({
 					status: "OK",
-					users: data.Items.length
+					users: data.Items
 				})
 			}
 		})
@@ -1194,7 +1310,7 @@ app.get('/user/:username/following',function(req,res){
 			}else{
 				res.send({
 					status: "OK",
-					users: data.Items.length
+					users: data.Items
 				})
 			}
 		})
@@ -1368,6 +1484,6 @@ app.get('/media/:id',function(req,res){
 })
 
 
-app.listen(8080, "172.31.64.118",function(){
+app.listen(8080, "127.0.0.1",function(){
 	console.log("Server listening on port " + 9000);
 })
