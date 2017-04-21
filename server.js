@@ -883,7 +883,7 @@ app.get('/user/:username/followers',function(req,res){
 		})
 	}
 	else{
-		cassandraClient.execute('SELECT User1 From Following where User2 = ? LIMIT 50; allow filtering',[req.params.username], function(err,result){
+		cassandraClient.execute('SELECT User1 From Following where User2 = ? LIMIT 50 allow filtering',[req.params.username], function(err,result){
 			if(err){
 				console.log(err);
 			}
