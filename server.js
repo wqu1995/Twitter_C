@@ -135,7 +135,8 @@ app.get('/login', function(req,res){
 	res.sendFile('login.html',{root: __dirname+'/public'});
 })
 app.post('/login', function(req,res){
-	cassandraClient.execute('SELECT * FROM Users WHERE Username = ? AND password = ?'[req.body.username, req.body.password], function(err, result){
+	console.log([req.body.username, req.body.password])
+	cassandraClient.execute('SELECT * FROM Users WHERE Username = ? AND password = ?'[req.body.username.toString(), req.body.password.toString()], function(err, result){
 			if(err){
 				console.log(err);
 				res.send({
