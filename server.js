@@ -136,7 +136,7 @@ app.get('/login', function(req,res){
 })
 app.post('/login', function(req,res){
 	console.log([req.body.username, req.body.password])
-	cassandraClient.execute('SELECT * FROM Users WHERE Username = ? AND password = ?'[req.body.username.toString(), req.body.password.toString()], function(err, result){
+	cassandraClient.execute('SELECT * FROM Users WHERE Username = ? AND password = ? ALLOW FILTERING'[req.body.username, req.body.password], function(err, result){
 			if(err){
 				console.log(err);
 				res.send({
