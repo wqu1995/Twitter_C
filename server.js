@@ -1484,6 +1484,6 @@ app.get('/media/:id',function(req,res){
 })
 
 
-app.listen(8080, "127.0.0.1",function(){
+app.listen(8080, "172.31.64.118",function(){
 	console.log("Server listening on port " + 9000);
 })
