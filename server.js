@@ -166,7 +166,8 @@ app.post('/login', function(req,res){
 	//console.log([req.body.username, req.body.password])
 	var params = {
 		TableName: "Users",
-		KeyConditionExpression: '#username = :usr and #password = :pas',
+		KeyConditionExpression: '#username = :usr',
+		FilterExpression: "#password = :pas",
 		ExpressionAttributeNames:{
         	"#username": "username",
         	"#password": "password" 
@@ -180,7 +181,7 @@ app.post('/login', function(req,res){
 		if(err){
 			console.log(err);
 		}else{
-			if(data[0].enabled ==="false"){
+			if(data.Items[0].enabled ==="false"){
 				res.send({
 					status: "error",
 							error: "Unactivated account!"
@@ -313,7 +314,7 @@ app.post('/verify',function(req,res){
 	if(req.body.key === 'abracadabra'){
 		var params = {
 			TableName: 'Users',
-			ProjectionExpressionL: "username",
+			//ProjectionExpressionL: "username",
 			FilterExpression: "#em = :em",
 			ExpressionAttributeNames:{
 				"#em" : "email"
@@ -324,13 +325,15 @@ app.post('/verify',function(req,res){
 		}
 		docClient.scan(params, function(err, data){
 			if(err){
+				console.log("in 1");
 				console.log(err)
 			}
 			else{
+				console.log(data);
 				var params = {
 					TableName: 'Users',
 					Key: {
-						"username": data.username
+						"username": data.Items[0].username
 					},
 					UpdateExpression: "set enabled = :t",
 					ExpressionAttributeValues:{
@@ -1141,6 +1144,6 @@ app.get('/media/:id',function(req,res){
 })
 
 
-app.listen(8080, "172.31.64.118",function(){
+app.listen(8080, "127.0.0.1",function(){
 	console.log("Server listening on port " + 9000);
 })
