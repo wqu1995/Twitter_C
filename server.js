@@ -137,6 +137,7 @@ app.get('/login', function(req,res){
 app.post('/login', function(req,res){
 	cassandraClient.execute('SELECT * FROM Users WHERE Username = ? AND password = ?'[req.body.username, req.body.password], function(err, result){
 			if(err){
+				console.log(err);
 				res.send({
 					status: "error",
 					error: err
@@ -1038,6 +1039,6 @@ app.get('/media/:id',function(req,res){
 })
 
 
-app.listen(8080, "172.31.64.118",function(){
+app.listen(8080, "172.31.25.137",function(){
 	console.log("Server listening on port " + 9000);
 })
