@@ -872,7 +872,7 @@ app.get('/user/:username',function(req,res){
 app.get('/user/:username/followers',function(req,res){
 	//console.log(req.params.username)
 	if(req.body.limit != null && req.body.limit != ""){
-		cassandraClient.execute('SELECT User1 From Following where User2 =? LIMIT ?', [req.params.username, req.body.limit] ,function(err,result){
+		cassandraClient.execute('SELECT User1 From Following where User2 =? LIMIT ? allow filtering', [req.params.username, req.body.limit] ,function(err,result){
 			if(err){
 				console.log(err);
 			}
@@ -883,7 +883,7 @@ app.get('/user/:username/followers',function(req,res){
 		})
 	}
 	else{
-		cassandraClient.execute('SELECT User1 From Following where User2 = ? LIMIT 50;',[req.params.username], function(err,result){
+		cassandraClient.execute('SELECT User1 From Following where User2 = ? LIMIT 50; allow filtering',[req.params.username], function(err,result){
 			if(err){
 				console.log(err);
 			}
@@ -901,7 +901,7 @@ app.get('/user/:username/followers',function(req,res){
 app.get('/user/:username/following',function(req,res){
 	//console.log(req.params.username)
 	if(req.body.limit != null && req.body.limit != ""){
-		cassandraClient.execute('SELECT User2 From Following where User1 = ? LIMIT ?', [req.params.username, req.body.limit],function(err,result){
+		cassandraClient.execute('SELECT User2 From Following where User1 = ? LIMIT ? allow filtering', [req.params.username, req.body.limit],function(err,result){
 			if(err){
 				console.log(err);
 			}
@@ -912,7 +912,7 @@ app.get('/user/:username/following',function(req,res){
 		})
 	}
 	else{
-		cassandraClient.execute('SELECT User2 From Following where User1 = ? LIMIT 50',[req.params.username], function(err,result){
+		cassandraClient.execute('SELECT User2 From Following where User1 = ? LIMIT 50 allow filtering',[req.params.username], function(err,result){
 			if(err){
 				console.log(err);
 			}
