@@ -138,12 +138,13 @@ app.post('/login', function(req,res){
 	console.log([req.body.username, req.body.password])
 	cassandraClient.execute('SELECT * FROM Users WHERE Username = ? AND password = ? ALLOW FILTERING'[req.body.username, req.body.password], function(err, result){
 			if(err){
-				console.log(err);
+				console.log("IN HERE ");
 				res.send({
 					status: "error",
 					error: err
 				});
 			}else{
+				console.log("IN ASDFFEASD=================");
 				if(result.rows.length===1){
 					if(result.rows[0].enabled === false){
 						res.send({
