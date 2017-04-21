@@ -164,7 +164,37 @@ app.get('/login', function(req,res){
 })
 app.post('/login', function(req,res){
 	//console.log([req.body.username, req.body.password])
-	cassandraClient.execute('SELECT * FROM Users WHERE Username = ? AND password = ? ALLOW FILTERING', [req.body.username, req.body.password], function(err, result){
+	var params = {
+		TableName: Users,
+		KeyConditionExpression: '#username = :usr and #password = :pas'
+		ExpressionAttributeNames:{
+        	"#username": "username",
+        	"#password": "password" 
+    	},
+    	ExpressionAttributeValues: {
+        	":usr":req.body.username,
+        	":pas": req.body.password
+    	}
+	}
+	docClient.query(params, function(err,data){
+		if(err){
+			console.log(err);
+		}else{
+			if(data[0].enabled ==="false"){
+				res.send({
+					status: "error",
+							error: "Unactivated account!"
+				})
+			}else{
+						req.session.user = req.body.username;
+						
+						res.send({
+							status: "OK"
+						})
+					}
+		}
+	})
+	/*cassandraClient.execute('SELECT * FROM Users WHERE Username = ? AND password = ? ALLOW FILTERING', [req.body.username, req.body.password], function(err, result){
 			if(err){
 				//console.log("IN HERE ");
 				res.send({
@@ -195,7 +225,8 @@ app.post('/login', function(req,res){
 						})
 				}
 			}
-		})
+		})*/
+
 })
 
 app.post('/logout',function(req,res){
