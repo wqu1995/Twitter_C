@@ -250,7 +250,7 @@ app.get('/verify',function(req,res){
 	}*/
 })
 app.post('/verify',function(req,res){
-	console.log("post+"+[req.body.email, req.body.key])
+	console.log([req.body.email, req.body.key])
 	if(req.body.key === 'abracadabra'){
 		cassandraClient.execute('SELECT username FROM Users WHERE email = ?', [req.body.email],function(err,result){
 			if(err){
