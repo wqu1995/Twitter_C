@@ -4,7 +4,7 @@ var fs = require('fs');
 var app = express();
 var serveStatic = require('serve-static');
 var session = require('cookie-session');
-var mysql = require('mysql');
+//var mysql = require('mysql');
 var crypto = require('crypto');
 var cryptoRandomString = require('crypto-random-string');
 var nodemailer = require('nodemailer');
@@ -13,10 +13,17 @@ var mongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 const dateTime = Date.now();
 var fileupload = require('express-fileupload');
-var cassandra = require('cassandra-driver');
+//var cassandra = require('cassandra-driver');
 var amqp = require('amqplib/callback_api');
 var amqpConn, chan;
 var exchange = 'twitter';
+var AWS =require("aws-sdk");
+
+AWS.config.update({
+    region: "us-east-2",
+   // endpoint: "http://localhost:8000"
+});
+var docClient = new AWS.DynamoDB.DocumentClient();
 
 /*amqp.connect('amqp://test:test@54.234.28.240', function(err,conn){
 	amqpConn = conn;
@@ -26,7 +33,7 @@ var exchange = 'twitter';
 	console.log("connected to amqp");
 })*/
 
-var cassandraClient = new cassandra.Client({
+/*var cassandraClient = new cassandra.Client({
 	contactPoints: ['54.164.116.15'],
 	keyspace: 'twitter'
 },function(err){
@@ -34,7 +41,7 @@ var cassandraClient = new cassandra.Client({
 		console.log(err);
 	else
 		console.log("connected to cassandra")
-})
+})*/
 
 //var url = 'mongodb://52.90.176.234:27017/twitter';
 //var url = 'mongodb://localhost:27017/twitter';
@@ -116,8 +123,17 @@ app.get('/adduser', function(req,res){
 app.post('/adduser', function(req,res){
 	var hash = crypto.createHash('md5').update(req.body.email).digest('hex');
 	var post = [req.body.username,req.body.password,req.body.email,false,hash];
-
-	cassandraClient.execute('INSERT INTO Users (username, password, email, enabled, verify) VALUES (?,?,?,?,?)', post, function(err,result){
+	var params = {
+		TableName: 'Users'.
+		Item:{
+			'username': req.body.username,
+			'password': req.body.password,
+			'email': req.body.email,
+			'enabled': 'false',
+			'verify': hash
+		}
+	}
+	/*cassandraClient.execute('INSERT INTO Users (username, password, email, enabled, verify) VALUES (?,?,?,?,?)', post, function(err,result){
 		if(err){
 			res.send({
 				status: "error",
@@ -126,6 +142,18 @@ app.post('/adduser', function(req,res){
 		}
 		else{
 			res.send({status: "OK"});
+		}
+	})*/
+	docClient.out(params, function(err,data){
+		if(err){
+			res.send({
+				status: "error",
+				error: err
+			})
+		}else{
+			res.send({
+				status: "OK"
+			})
 		}
 	})
 		
