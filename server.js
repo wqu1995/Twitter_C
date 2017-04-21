@@ -144,7 +144,7 @@ app.post('/adduser', function(req,res){
 			res.send({status: "OK"});
 		}
 	})*/
-	docClient.out(params, function(err,data){
+	docClient.put(params, function(err,data){
 		if(err){
 			res.send({
 				status: "error",
