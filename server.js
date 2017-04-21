@@ -165,7 +165,7 @@ app.get('/login', function(req,res){
 app.post('/login', function(req,res){
 	//console.log([req.body.username, req.body.password])
 	var params = {
-		TableName: Users,
+		TableName: "Users",
 		KeyConditionExpression: '#username = :usr and #password = :pas',
 		ExpressionAttributeNames:{
         	"#username": "username",
@@ -332,7 +332,10 @@ app.post('/verify',function(req,res){
 					Key: {
 						"username": data.username
 					},
-					UpdateExpression: "set enabled = true"
+					UpdateExpression: "set enabled = :t"
+					ExpressionAttributeValues:{
+						":t": "true"
+					}
 				};
 				docClient.update(params, function(err,result){
 					if(err){
