@@ -135,16 +135,16 @@ app.get('/login', function(req,res){
 	res.sendFile('login.html',{root: __dirname+'/public'});
 })
 app.post('/login', function(req,res){
-	console.log([req.body.username, req.body.password])
+	//console.log([req.body.username, req.body.password])
 	cassandraClient.execute('SELECT * FROM Users WHERE Username = ? AND password = ? ALLOW FILTERING', [req.body.username, req.body.password], function(err, result){
 			if(err){
-				console.log("IN HERE ");
+				//console.log("IN HERE ");
 				res.send({
 					status: "error",
 					error: err
 				});
 			}else{
-				console.log("IN ASDFFEASD=================");
+				//console.log("IN ASDFFEASD=================");
 				if(result.rows.length===1){
 					if(result.rows[0].enabled === false){
 						res.send({
@@ -183,6 +183,7 @@ app.post('/logout',function(req,res){
 })
 
 app.get('/verify',function(req,res){
+	console.log("get+"+[req.query.email, req.query.key])
 	if(req.query.key === 'abracadabra'){
 		cassandraClient.execute('SELECT username FROM Users WHERE email = ?',[req.query.email],function(err,result){
 			if(err){
@@ -249,6 +250,7 @@ app.get('/verify',function(req,res){
 	}*/
 })
 app.post('/verify',function(req,res){
+	console.log("post+"+[req.body.email, req.body.key])
 	if(req.body.key === 'abracadabra'){
 		cassandraClient.execute('SELECT username FROM Users WHERE email = ?', [req.body.email],function(err,result){
 			if(err){
