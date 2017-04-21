@@ -839,7 +839,7 @@ app.get('/user/:username',function(req,res){
 					error: err
 				})
 				}else{
-					following = result.rows[0].Following;
+					following = result.rows[0].following;
 					console.log(result.rows[0]);
 					cassandraClient.execute('SELECT COUNT(User1) AS Follower FROM Following WHERE User2 = ? allow filtering',[req.params.username], function(err, result){
 						if(err){
@@ -848,7 +848,7 @@ app.get('/user/:username',function(req,res){
 					error: err
 				})
 						}else{
-							follower = result.rows[0].Follower;
+							follower = result.rows[0].follower;
 							console.log(result.rows[0]);
 							var response = {
 								email : email,
