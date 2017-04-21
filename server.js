@@ -332,7 +332,7 @@ app.post('/verify',function(req,res){
 					Key: {
 						"username": data.username
 					},
-					UpdateExpression: "set enabled = true",
+					UpdateExpression: "set enabled = true"
 				},
 				docClient.update(params, function(err,result){
 					if(err){
@@ -345,7 +345,7 @@ app.post('/verify',function(req,res){
 				})
 			}
 		})
-		cassandraClient.execute('SELECT username FROM Users WHERE email = ? ALLOW FILTERING', [req.body.email],function(err,result){
+		/*cassandraClient.execute('SELECT username FROM Users WHERE email = ? ALLOW FILTERING', [req.body.email],function(err,result){
 			if(err){
 				res.send({
 					status: "error",
@@ -374,7 +374,7 @@ app.post('/verify',function(req,res){
 					})
 				}
 			}
-		})
+		})*/
 	}
 	/*else{
 		var query = connection.query('SELECT username FROM Users WHERE email = '+mysql.escape(req.body.email)
