@@ -166,7 +166,7 @@ app.post('/login', function(req,res){
 	//console.log([req.body.username, req.body.password])
 	var params = {
 		TableName: Users,
-		KeyConditionExpression: '#username = :usr and #password = :pas'
+		KeyConditionExpression: '#username = :usr and #password = :pas',
 		ExpressionAttributeNames:{
         	"#username": "username",
         	"#password": "password" 
