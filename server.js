@@ -333,7 +333,7 @@ app.post('/verify',function(req,res){
 						"username": data.username
 					},
 					UpdateExpression: "set enabled = true"
-				},
+				};
 				docClient.update(params, function(err,result){
 					if(err){
 						console.log(err);
