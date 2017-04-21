@@ -607,7 +607,7 @@ app.post('/searchTweets',function(req,res){
 
 	})
 })
- app.post('/search',function(req,res){
+/*app.post('/search',function(req,res){
  	//console.log(req.body);
  	var newStamp = req.body.timestamp || dateTime;
  	var q = req.body.q;
@@ -903,7 +903,11 @@ app.post('/searchTweets',function(req,res){
  		}
  
  	}
- })
+ })*/
+
+app.post('/search',function(req,res){
+	console.log(res.body);
+}
 
 app.post('/item/:id/like',function(req,res){
 	//console.log('in here');
