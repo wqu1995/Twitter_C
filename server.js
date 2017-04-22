@@ -1589,10 +1589,7 @@ app.post('/addmedia', function(req,res){
 
 	var id = crypto.createHash('md5').update(req.files.content.name).digest('hex');
 	var data = [id, req.files.content.data];
-		res.send({
-		status:"OK",
-		id: id
-	})
+
 //	console.log(id);
 //	console.log(data);
 //	chanRec.publish(exchange, 'add', data);
@@ -1618,6 +1615,11 @@ app.post('/addmedia', function(req,res){
 	cassandraClient.execute('INSERT INTO media (id, content) VALUES (?, ?)',data, function(err, result){
 		if(err){
 			console.log(err);
+		}else{
+				res.send({
+		status:"OK",
+		id: id
+	})
 		}
 	})
 
