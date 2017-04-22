@@ -1662,6 +1662,7 @@ app.get('/media/:id',function(req,res){
 				error: err
 			})
 		}else if(result.rows.length == 0){
+			res.set({'content-type': 'image/png'});
 			res.send({
 				status: "error",
 				error: "no item found"
