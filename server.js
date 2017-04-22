@@ -1196,10 +1196,8 @@ app.delete('/item/:id',function(req,res){
 					})
 				}
 			})
-			cassandraClient.execute('DELETE FROM media WHERE id = ?', [records.media[0]],function(err, result){
-				if(err){
-					console.log(err);
-				}
+			mongoDB.collection('media').deleteMany({'id':records.id}, function(err,records){
+
 			})
 		}
 	})
@@ -1588,8 +1586,21 @@ app.post('/addmedia', function(req,res){
 
 
 	var id = crypto.createHash('md5').update(req.files.content.name).digest('hex');
-	var data = [id, req.files.content.data];
-
+	//var data = [id, req.files.content.data];
+	var params = {
+			'id': id,
+			'content': req.files.content.data
+		};
+		mongoDB.collection('media').insertOne(params, function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+				res.send({
+					status:"OK"
+				})
+			}
+		})
 //	console.log(id);
 //	console.log(data);
 //	chanRec.publish(exchange, 'add', data);
@@ -1612,7 +1623,7 @@ app.post('/addmedia', function(req,res){
 			})
 		}
 	})*/
-	cassandraClient.execute('INSERT INTO media (id, content) VALUES (?, ?)',data, function(err, result){
+	/*cassandraClient.execute('INSERT INTO media (id, content) VALUES (?, ?)',data, function(err, result){
 		if(err){
 			console.log(err);
 		}else{
@@ -1621,11 +1632,35 @@ app.post('/addmedia', function(req,res){
 		id: id
 	})
 		}
-	})
+	})*/
 
 })
 
 app.get('/media/:id',function(req,res){
+	var params = {
+		'id': req.params.id
+	}
+	mongoDB.collection('media').findOne(params, function(err,records){
+		if(err){
+			res.send({
+				status: "error",
+				error: err
+			})
+		}
+		else{
+			if(records == null){
+				res.send({
+				status: "error",
+				error: "no item found"
+			})
+			}
+			else{
+				res.writeHead(200,{'content-type': 'image/png'});
+			res.write(new Buffer(records.content), 'binary');
+			res.end();
+				}
+		}
+	})
 	//console.log(req.params.id);
 	/*var params = {
 		TableName: "Media",
@@ -1647,7 +1682,7 @@ app.get('/media/:id',function(req,res){
 			res.end();
 		}
 	})*/
-	var query = 'SELECT content FROM media WHERE id = ?';
+	/*var query = 'SELECT content FROM media WHERE id = ?';
 	var par = [req.params.id]
 	cassandraClient.execute(query, par, function(err,result){
 		if(err){
@@ -1666,7 +1701,8 @@ app.get('/media/:id',function(req,res){
 			res.write(new Buffer(result.rows[0].content), 'binary');
 			res.end();
 		}
-	})
+	})*/
+
 })
 
 
