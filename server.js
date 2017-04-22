@@ -1088,8 +1088,9 @@ app.delete('/item/:id',function(req,res){
 		if(err){
 			console.log(err);
 		}else{
-			if(data.Items[0].media != null && data.Items[0].media != " "){
-				cassandraClient.execute('DELETE FROM Media WHERE id = ?', [data.Items[0].media],function(err,result){
+			console.log(data);
+			if(data.Items[0].media != " "){
+				cassandraClient.execute('DELETE FROM Media WHERE id = ?', [data.Items[0].media[0]],function(err,result){
 					if(err){
 						console.log(err)
 					}
@@ -1493,7 +1494,7 @@ app.post('/addmedia', function(req,res){
 			})
 		}
 	})*/
-	cassandraClient.execute('INSERT INTO Media (id, content) VALUES (?, ?)',data, function(err, result){
+	cassandraClient.execute('INSERT INTO media (id, content) VALUES (?, ?)',data, function(err, result){
 		if(err){
 			res.send({
 				status: "error",
@@ -1532,7 +1533,7 @@ app.get('/media/:id',function(req,res){
 			res.end();
 		}
 	})*/
-	var query = 'SELECT content FROM Media WHERE id = ?';
+	var query = 'SELECT content FROM media WHERE id = ?';
 	var par = [req.params.id]
 	cassandraClient.execute(query, par, function(err,result){
 		if(err){
