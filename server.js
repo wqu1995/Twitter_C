@@ -1015,7 +1015,7 @@ app.post('/search', function(req,res){
 			else{
 				res.send({
 					status:"OK",
-					itmes:records
+					items:records
 				})
 			}
 		})
