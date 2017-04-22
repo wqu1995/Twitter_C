@@ -1586,12 +1586,13 @@ app.post('/follow',function(req,res){
 
 app.post('/addmedia', function(req,res){
 
-	res.send({
+
+	var id = crypto.createHash('md5').update(req.files.content.name).digest('hex');
+	var data = [id, req.files.content.data];
+		res.send({
 		status:"OK",
 		id: id
 	})
-	var id = crypto.createHash('md5').update(req.files.content.name).digest('hex');
-	var data = [id, req.files.content.data];
 //	console.log(id);
 //	console.log(data);
 //	chanRec.publish(exchange, 'add', data);
