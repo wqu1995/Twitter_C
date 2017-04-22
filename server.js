@@ -1228,7 +1228,7 @@ app.delete('/item/:id',function(req,res){
 	}
 	mongoDB.collection('Tweets').findOne(find, function(err,records){
 
-		//console.log(records);
+		console.log(records);
 		if(records.media !=null){
 			//console.log(records.media)
 			//chanDel.publish(exchange, 'delete', new Buffer("[\""+records.media.toString()+"\"]"));
@@ -1237,14 +1237,14 @@ app.delete('/item/:id',function(req,res){
 					console.log(err)
 				}else{
 					mongoDB.collection('Tweets').deleteMany(find, function(err,records){
-				if(err){
-					console.log(err)
-				}else{
-					res.send({
-						status:"OK"
+						if(err){
+							console.log(err)
+						}else{
+							res.send({
+								status:"OK"
+							})
+						}
 					})
-				}
-			})
 				}
 			})
 			
@@ -1699,6 +1699,7 @@ app.get('/media/:id',function(req,res){
 			})
 		}
 		else{
+			console.log(records.id);
 			if(records == null){
 				res.send({
 				status: "error",
