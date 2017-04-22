@@ -1016,7 +1016,7 @@ app.post('/search', function(req,res){
 				var response = [];
 				for(var i = 0; i<records.length; i++){
 					var temp = {
-						id : records[i]._id
+						id : records[i]._id,
 						content: records[i].content,
 						username: records[i].username,
 						timestamp: records[i].timestamp,
