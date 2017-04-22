@@ -1187,7 +1187,11 @@ app.delete('/item/:id',function(req,res){
 		if(records.media !=null){
 			//console.log(records.media)
 			//chanDel.publish(exchange, 'delete', new Buffer("[\""+records.media.toString()+"\"]"));
-			mongoDB.collection('Tweets').deleteMany(find, function(err,records){
+			mongoDB.collection('media').deleteMany({'id':records.id}, function(err,records){
+				if(err){
+					console.log(err)
+				}else{
+					mongoDB.collection('Tweets').deleteMany(find, function(err,records){
 				if(err){
 					console.log(err)
 				}else{
@@ -1196,9 +1200,10 @@ app.delete('/item/:id',function(req,res){
 					})
 				}
 			})
-			mongoDB.collection('media').deleteMany({'id':records.id}, function(err,records){
-
+				}
 			})
+			
+			
 		}
 	})
 	/*docClient.query(params, function(err,data){
