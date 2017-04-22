@@ -533,7 +533,7 @@ app.get('/item/:id',function(req,res){
 		TableName: "Tweets",
 		KeyConditionExpression: "#id = :id",
 		ExpressionAttributeNames:{
-			"#id": id
+			"#id": "id"
 		},
 		ExpressionAttributeValues:{
 			":id": req.params.id
