@@ -518,10 +518,10 @@ var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString
 			if(err){
 				console.log(err)
 			}else{
-				console.log(records._id)
+				console.log(params._id)
 				res.send({
 					status:"OK",
-					id: records._id
+					id: params._id
 				})
 			}
 		})
