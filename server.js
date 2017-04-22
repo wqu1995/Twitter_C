@@ -331,9 +331,8 @@ app.post('/verify',function(req,res){
 			"email": req.body.email
 		}
 		var update = {
-			$set: {"enabled" : true},
-			$currentDate: { "lastModified": true }
-		}
+			$set: {"enabled" : true}
+					}
 		mongoDB.collection('Users').findOne(con, function(err,records){
 			if(err){
 				console.log(err)
@@ -1667,6 +1666,6 @@ app.get('/media/:id',function(req,res){
 })
 
 
-app.listen(8080, "172.31.1.118",function(){
+app.listen(8080, "127.0.0.1",function(){
 	console.log("Server listening on port " + 9000);
 })
