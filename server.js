@@ -518,7 +518,7 @@ var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString
 			if(err){
 				console.log(err)
 			}else{
-				console.log(params._id)
+				//console.log(params._id)
 				res.send({
 					status:"OK",
 					id: params._id
@@ -575,6 +575,7 @@ app.get('/item/:id',function(req,res){
 		if(err){
 			console.log(err);
 		}else{
+			console.log(records)
 			res.send({
 				status:"OK",
 				item: records
@@ -1034,6 +1035,9 @@ app.post('/search', function(req,res){
 			}
 		})
 
+	}
+	else{
+		console.log(req.body)
 	}
 
 })
