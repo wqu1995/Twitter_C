@@ -575,12 +575,21 @@ app.get('/item/:id',function(req,res){
 		if(err){
 			console.log(err);
 		}else{
-			console.log(records)
+		//	console.log(records)
+		if(records == null){
+			res.send({
+				status:"error";
+				error: "no item found"
+			})
+		}
+		else{
 			res.send({
 				status:"OK",
 				item: records
 			})
 		}
+		}
+			
 	})
 	/*cassandraClient.execute('SELECT * FROM Tweets WHERE id = ?',[req.params.id], function(err,result){
 		if(err){
