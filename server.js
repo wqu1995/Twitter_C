@@ -1055,7 +1055,7 @@ app.post('/search', function(req,res){
 	else if(req.body.username != null && req.body.rank != null &&req.body.limit !=null && req.body.replies == true && req.body.following == false){
 		var con = {
 			'timestamp': {$lt: newStamp},
-			'usernmae' : req.body.username
+			'username' : req.body.username
 		}
 		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,result){
 			if(err){
