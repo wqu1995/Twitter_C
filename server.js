@@ -1021,7 +1021,7 @@ app.post('/searchx',function(req,res){
 })*/
 app.post('/search', function(req,res){
 	var newStamp = req.body.timestamp || dateTime;
-	console.log(req.body)
+	//console.log(req.body)
 	if(req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
 		//console.log(1);
 		var con = {
@@ -1185,6 +1185,7 @@ app.delete('/item/:id',function(req,res){
 	mongoDB.collection('Tweets').findOne(find, function(err,records){
 		//console.log(records);
 		if(records.media !=null){
+			console.log(records.media)
 			chanDel.publish(exchange, 'delete', new Buffer(records.media.toString()));
 			mongoDB.collection('Tweets').deleteMany(find, function(err,records){
 				if(err){
