@@ -14,27 +14,29 @@ var assert = require('assert');
 const dateTime = Date.now();
 var fileupload = require('express-fileupload');
 var cassandra = require('cassandra-driver');
-var amqp = require('amqplib/callback_api');
-var amqpConn, chan;
+var amqpRec = require('amqplib/callback_api');
+var amqpDel = require('amqplib/callback_api');
+var amqpConn, chanRec, chanDel;
 var exchange = 'twitter';
-var AWS =require("aws-sdk");
+var mongoDB;
 
-AWS.config.update({
-    region: "us-east-1",
-   // endpoint: "http://localhost:8000"
-});
-var docClient = new AWS.DynamoDB.DocumentClient();
-
-/*amqp.connect('amqp://test:test@54.234.28.240', function(err,conn){
+amqpRec.connect('amqp://test:test@52.3.230.248', function(err,conn){
 	amqpConn = conn;
-	chan = conn.createChannel(function(err,ch){
+	chanRec = conn.createChannel(function(err,ch){
 		ch.assertExchange('twitter', 'direct');
 	})
 	console.log("connected to amqp");
-})*/
+})
+amqpDel.connect('amqp://test:test@54.236.241.144', function(err,conn){
+	amqpConn = conn;
+	chanDel = conn.createChannel(function(err,ch){
+		ch.assertExchange('twitter', 'direct');
+	})
+	console.log("connected to amqp");
+})
 
 var cassandraClient = new cassandra.Client({
-	contactPoints: ['13.58.73.62'],
+	contactPoints: ['52.3.230.248'],
 	keyspace: 'twitter'
 },function(err){
 	if(err)
@@ -43,16 +45,20 @@ var cassandraClient = new cassandra.Client({
 		console.log("connected to cassandra")
 })
 
-//var url = 'mongodb://52.90.176.234:27017/twitter';
+var url = 'mongodb://34.205.39.47:27017/Twitter';
 //var url = 'mongodb://localhost:27017/twitter';
 
 
-/*
+
 mongoClient.connect(url,function(err,db){
-	assert.equal(null,err);
-	console.log("CONNECTION SUCCESS");
+	if(err){
+		console.log(err)
+	}else{
+		console.log("CONNECTION SUCCESS");
+		mongoDB = db;
+	}
 	//db.tweets.createIndex({"content": "text"});
-	})*/
+	})
 
 
 /*var connection = mysql.createConnection({
@@ -122,16 +128,13 @@ app.get('/adduser', function(req,res){
 })
 app.post('/adduser', function(req,res){
 	var hash = crypto.createHash('md5').update(req.body.email).digest('hex');
-	var post = [req.body.username,req.body.password,req.body.email,false,hash];
+	//var post = [req.body.username,req.body.password,req.body.email,false,hash];
 	var params = {
-		TableName: 'Users',
-		Item:{
-			'username': req.body.username,
+		'username': req.body.username,
 			'password': req.body.password,
 			'email': req.body.email,
-			'enabled': 'false',
+			'enabled': false,
 			'verify': hash
-		}
 	}
 	/*cassandraClient.execute('INSERT INTO Users (username, password, email, enabled, verify) VALUES (?,?,?,?,?)', post, function(err,result){
 		if(err){
@@ -144,7 +147,7 @@ app.post('/adduser', function(req,res){
 			res.send({status: "OK"});
 		}
 	})*/
-	docClient.put(params, function(err,data){
+	/*docClient.put(params, function(err,data){
 		if(err){
 			res.send({
 				status: "error",
@@ -155,6 +158,16 @@ app.post('/adduser', function(req,res){
 				status: "OK"
 			})
 		}
+	})*/
+	mongoDB.collection('Users').insert(params, function(err,records){
+		if(err){
+			console.log(err)
+		}else{
+			res.send({
+				status: "OK"
+			})
+			mongoDB.close();
+		}
 	})
 		
 })
@@ -164,20 +177,26 @@ app.get('/login', function(req,res){
 })
 app.post('/login', function(req,res){
 	//console.log([req.body.username, req.body.password])
+	
 	var params = {
-		TableName: "Users",
-		KeyConditionExpression: '#username = :usr',
-		FilterExpression: "#password = :pas",
-		ExpressionAttributeNames:{
-        	"#username": "username",
-        	"#password": "password" 
-    	},
-    	ExpressionAttributeValues: {
-        	":usr":req.body.username,
-        	":pas": req.body.password
-    	}
+		'username': req.body.username,
+		'password': req.body.password
 	}
-	docClient.query(params, function(err,data){
+	mongoDB.collection('Users').findOne(params, function(err,records){
+		if(records.enabled == false){
+			res.send({
+					status: "error",
+							error: "Unactivated account!"
+				})
+		}else{
+			req.session.user = req.body.username;
+						
+						res.send({
+							status: "OK"
+						})
+		}
+	})
+	/*docClient.query(params, function(err,data){
 		if(err){
 			console.log(err);
 		}else{
@@ -187,14 +206,10 @@ app.post('/login', function(req,res){
 							error: "Unactivated account!"
 				})
 			}else{
-						req.session.user = req.body.username;
 						
-						res.send({
-							status: "OK"
-						})
 					}
 		}
-	})
+	})*/
 	/*cassandraClient.execute('SELECT * FROM Users WHERE Username = ? AND password = ? ALLOW FILTERING', [req.body.username, req.body.password], function(err, result){
 			if(err){
 				//console.log("IN HERE ");
@@ -312,18 +327,33 @@ app.get('/verify',function(req,res){
 app.post('/verify',function(req,res){
 	//console.log([req.body.email, req.body.key])
 	if(req.body.key === 'abracadabra'){
-		var params = {
-			TableName: 'Users',
-			//ProjectionExpressionL: "username",
-			FilterExpression: "#em = :em",
-			ExpressionAttributeNames:{
-				"#em" : "email"
-			},
-			ExpressionAttributeValues:{
-				":em" : req.body.email
-			}
+		var con = {
+			"email": req.body.email
 		}
-		docClient.scan(params, function(err, data){
+		var update = {
+			$set: {"enabled" : true},
+			$currentDate: { "lastModified": true }
+		}
+		mongoDB.collection('Users').findOne(con, function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+				console.log(records);
+				mongoDB.collection('Users').updateOne({'username':records.username}, update, function(err,result){
+					if(err){
+						console.log(err)
+					}
+					else{
+						res.send({
+					status:"OK"
+				})
+					}
+				})
+				
+			}
+		})
+		/*docClient.scan(params, function(err, data){
 			if(err){
 				console.log("in 1");
 				console.log(err)
@@ -350,7 +380,8 @@ app.post('/verify',function(req,res){
 					}
 				})
 			}
-		})
+		})*/
+
 		/*cassandraClient.execute('SELECT username FROM Users WHERE email = ? ALLOW FILTERING', [req.body.email],function(err,result){
 			if(err){
 				res.send({
@@ -434,9 +465,6 @@ var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString
 			if(req.body.media !=null && req.body.media != ""){
 			//	post = [postid,req.body.content,req.session.user,timestamp,req.body.parent,req.body.media.toString(),0]
 				params = {
-					TableName: "Tweets",
-					Item:{
-						"id": postid,
 						"content": req.body.content,
 						"username": req.session.user,
 						"timestamp": timestamp,
@@ -444,23 +472,18 @@ var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString
 						"media": req.body.media,
 						"likes": 0
 					}
-				}
+
 			}
 			else{
 			//	post = [postid,req.body.content,req.session.user,timestamp,req.body.parent,null,0]
 				params = {
-					TableName: "Tweets",
-					Item:{
-						"id": postid,
 						"content": req.body.content,
 						"username": req.session.user,
 						"timestamp": timestamp,
 						"parent": req.body.parent,
-						"media": " ",
+						"media": null,
 						"likes": 0
 					}
-				}
-
 			}
 		}
 			
@@ -468,37 +491,40 @@ var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString
 			if(req.body.media !=null && req.body.media != ""){
 				//post = [postid,req.body.content,req.session.user,timestamp,null,req.body.media.toString(),0]
 				params = {
-					TableName: "Tweets",
-					Item:{
-						"id": postid,
+
 						"content": req.body.content,
 						"username": req.session.user,
 						"timestamp": timestamp,
-						"parent": " ",
+						"parent": null,
 						"media": req.body.media,
 						"likes": 0
 					}
-				}
-
 			}
 			else{
 				//post = [postid,req.body.content,req.session.user,timestamp,null,null,0]
 				params = {
-					TableName: "Tweets",
-					Item:{
-						"id": postid,
+
 						"content": req.body.content,
 						"username": req.session.user,
 						"timestamp": timestamp,
-						"parent": " ",
-						"media": " ",
+						"parent": null,
+						"media": null,
 						"likes": 0
 					}
-				}
 
 			}
 		}
-		docClient.put(params, function(err,data){
+		mongoDB.collection('Tweets').insertOne(params, function(err,records){
+			if(err){
+				console.log(err)
+			}else{
+				res.send({
+					status:"OK",
+					id: records._id
+				})
+			}
+		})
+		/*docClient.put(params, function(err,data){
 			if(err){
 				console.log(err);
 			}else{
@@ -507,7 +533,7 @@ var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString
 					id: postid
 				})
 			}
-		})
+		})*/
 		/*cassandraClient.execute('INSERT INTO Tweets (id, content, username, timestamp, parent, media, likes) VALUES (?,?,?,?,?,?,?)', post,function(err, result){
 			if(err){
 				console.log(post);
@@ -530,17 +556,10 @@ var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString
 app.get('/item/:id',function(req,res){
 
 	var params = {
-		TableName: "Tweets",
-		KeyConditionExpression: "#id = :id",
-		ExpressionAttributeNames:{
-			"#id": "id"
-		},
-		ExpressionAttributeValues:{
-			":id": req.params.id
-		}
+		'_id': require('mongodb').ObjectId(req.params.id)
 	}
 
-	docClient.query(params,function(err,data){
+	/*docClient.query(params,function(err,data){
 		if(err){
 			console.log(err);
 		}
@@ -548,6 +567,16 @@ app.get('/item/:id',function(req,res){
 			res.send({
 				status: "OK",
 				item: data.Items[0]
+			})
+		}
+	})*/
+	mongoDB.collection('Tweets').findOne(params, function(err,records){
+		if(err){
+			console.log(err);
+		}else{
+			res.send({
+				status:"OK",
+				item: records
 			})
 		}
 	})
@@ -978,23 +1007,28 @@ app.post('/searchx',function(req,res){
 app.post('/item/:id/like',function(req,res){
 	//console.log('in here');
 	if(req.body.like == true){
-		var params = {
-			TableName: "Tweets",
-			Key:{
-				"id": req.params.id
-			},
-			UpdateExpression: "set likes = likes + :x",
-			ExpressionAttributeValues:{
-				":x": 1
-			}
+		var con = {
+			'_id': require('mongodb').ObjectId(req.params.id)
 		}
-		docClient.update(params, function(err,data){
+		var update = {
+			$inc: {'likes': 1}
+		}
+		/*docClient.update(params, function(err,data){
 			if(err){
 				console.log(err);
 			}else{
 				res.send({
 					status: "OK"
 				});
+			}
+		})*/
+		mongoDB.collection('Tweets').updateOne(con, update, function(err,result){
+			if(err){
+				console.log(err)
+			}else{
+				res.send({
+					status:"OK"
+				})
 			}
 		})
 		//console.log("in true");
@@ -1013,24 +1047,28 @@ app.post('/item/:id/like',function(req,res){
 			}
 		})*/
 	}else if(req.body.like == false){
-		console.log("in false");
-		var params = {
-			TableName: "Tweets",
-			Key:{
-				"id": req.params.id
-			},
-			UpdateExpression: "set likes = likes - :x",
-			ExpressionAttributeValues:{
-				":x": 1
-			}
+		var con = {
+			'_id': require('mongodb').ObjectId(req.params.id)
 		}
-		docClient.update(params, function(err,data){
+		var update = {
+			$inc: {'likes': -1}
+		}
+		/*docClient.update(params, function(err,data){
 			if(err){
 				console.log(err);
 			}else{
 				res.send({
 					status: "OK"
 				});
+			}
+		})*/
+		mongoDB.collection('Tweets').updateOne(con, update, function(err,result){
+			if(err){
+				console.log(err)
+			}else{
+				res.send({
+					status:"OK"
+				})
 			}
 		})
 		/*cassandraClient.execute('UPDATE Tweets SET like = like - 1 WHERE id = ?',[req.params.id],function(err,result){
@@ -1054,37 +1092,26 @@ app.post('/item/:id/like',function(req,res){
 })
 
 app.delete('/item/:id',function(req,res){
-	//console.log(req.params.id);
-	/*var id = require('mongodb').ObjectId(req.params.id);
-	mongoClient.connect(url,function(err,db){
-	assert.equal(null,err);
-	db.collection('tweets').remove({'_id': id},function(err,doc){
-		if (err){
-			//console.log(err)
-			res.send({
-				status : "error"
-			});
-		}
-		else{
-			//console.log("TWEET DELETED");
-			res.send({
-				status : "OK"
+
+	var find = {
+		'_id': require('mongodb').ObjectId(req.params.id)
+	}
+	mongoDB.collection('Tweets').findOne(find, function(err,records){
+		//console.log(records);
+		if(records.media !=null){
+			chanDel.publish(exchange, 'delete', new Buffer(records.media.toString()));
+			mongoDB.collection('Tweets').deleteMany(find, function(err,records){
+				if(err){
+					console.log(err)
+				}else{
+					res.send({
+						status:"OK"
+					})
+				}
 			})
 		}
 	})
-})*/
-//console.log("in delete item")
-	var params = {
-		TableName : "Tweets",
-		KeyConditionExpression: "#id = :id",
-		ExpressionAttributeNames:{
-			"#id": "id",
-		},
-		ExpressionAttributeValues:{
-			":id": req.params.id
-		}
-	}
-	docClient.query(params, function(err,data){
+	/*docClient.query(params, function(err,data){
 		if(err){
 			console.log(err);
 		}else{
@@ -1097,7 +1124,7 @@ app.delete('/item/:id',function(req,res){
 				})
 			}
 		}
-	})
+	})*/
 	/*cassandraClient.execute('SELECT media FROM Tweets WHERE id = ?',[req.params.id], function(err,result){
 		if(err){
 			res.send({
@@ -1115,49 +1142,60 @@ app.delete('/item/:id',function(req,res){
 			}
 		}
 	})*/
-	var params = {
-		TableName : "Tweets",
-		Key: {
-			"id": req.params.id
-		}
-	}
-	docClient.delete(params, function(err,data){
-		if(err){
-			console.log(err);
-		}else{
-			res.send({
-				status :"OK"
-			})
-		}
-	})
-	/*cassandraClient.execute('DELETE FROM Tweets WHERE id = ?',[req.params.id], function(err,result){
-		if(err){
-			res.send({
-				status : "error",
-				error : err
-			})
-		}else{
-			res.send({
-				status : "OK"
-			})
-		}
-	})*/
+
 })
 
 app.get('/user/:username',function(req,res){
 	var email, follower, following;
 	var params = {
-		TableName: "Users",
-		FilterExpression: "#username = :username",
-		ExpressionAttributeNames:{
-			"#username": "username"
-		},
-		ExpressionAttributeValues:{
-			":username": req.params.username
-		}
+		'username':req.params.username
 	}
+	mongoDB.collection('Users').findOne(params,function(err,records){
+		if(err){
 
-	docClient.scan(params, function(err,data){
+		
+		}else{
+			email = records.email;
+			var followingcon = {
+		'user1': req.params.username
+	}
+	mongoDB.collection('Users').find(followingcon).count(function(err,records){
+		if(err){
+			console.log(err)
+			
+		}else{
+			console.log(records)
+			following = records
+			var followercon = {
+		'user2': req.params.username
+	}
+	mongoDB.collection('Users').find(followercon).count(function(err,records){
+		if(err){
+			console.log(err)
+		}else{
+			follower = records;
+			var response = {
+								email : email,
+								followers : follower,
+								following : following
+							}
+			res.send({
+				status: "OK",
+				user: response
+			})
+		}
+		
+		
+	})
+		}
+	})
+		}
+
+	})
+	
+	
+
+	/*docClient.scan(params, function(err,data){
 		if(err){
 			console.log(err)
 		}else{
@@ -1195,15 +1233,7 @@ app.get('/user/:username',function(req,res){
 						if(err){
 							console.log(err);
 						}else{
-							var response = {
-									email : email,
-									followers : follower,
-									following : following
-								}
-							res.send({
-								status: "OK",
-								user: response
-							})
+							
 						}
 				})
 
@@ -1211,7 +1241,7 @@ app.get('/user/:username',function(req,res){
 			})
 
 		}
-	})
+	})*/
 	/*cassandraClient.execute('SELECT email FROM Users WHERE username = ? allow filtering',[req.params.username], function(err,result){
 		if(err){
 			res.send({
@@ -1262,17 +1292,20 @@ app.get('/user/:username/followers',function(req,res){
 	//console.log(req.params.username)
 	if(req.body.limit != null && req.body.limit != ""){
 		var params ={
-			TableName: "Following",
-			Limit : req.body.limit,
-			FilterExpression: "#user2 = :user2",
-			ExpressionAttributeNames:{
-				"#user2" : "user2"
-			},
-			ExpressionAttributeValues:{
-				":user2": req.params.username
-			}
+			'user2': req.params.username
 		}
-		docClient.scan(params,function(err, data){
+		mongoDB.collection('Follow').find(params, {'user1':1},{limit: req.body.limit}).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+				res.send({
+					status:"OK",
+					users: records
+				})
+			}
+		})
+		/*docClient.scan(params,function(err, data){
 			if(err){
 				console.log(err);
 			}else{
@@ -1281,7 +1314,7 @@ app.get('/user/:username/followers',function(req,res){
 					users: data.Items
 				})
 			}
-		})
+		})*/
 		/*cassandraClient.execute('SELECT User1 From Following where User2 =? LIMIT ? allow filtering', [req.params.username, req.body.limit] ,function(err,result){
 			if(err){
 				console.log(err);
@@ -1305,24 +1338,17 @@ app.get('/user/:username/followers',function(req,res){
 				res.send(response);
 			}
 		})*/
-				var params ={
-			TableName: "Following",
-			Limit : 50,
-			FilterExpression: "#user2 = :user2",
-			ExpressionAttributeNames:{
-				"#user2" : "user2"
-			},
-			ExpressionAttributeValues:{
-				":user2": req.params.username
-			}
+		var params ={
+			'user2': req.params.username
 		}
-		docClient.scan(params,function(err, data){
+		mongoDB.collection('Follow').find(params, {'user1':1},{limit: 50}).toArray(function(err,records){
 			if(err){
-				console.log(err);
-			}else{
+				console.log(err)
+			}
+			else{
 				res.send({
-					status: "OK",
-					users: data.Items
+					status:"OK",
+					users: records
 				})
 			}
 		})
@@ -1333,23 +1359,16 @@ app.get('/user/:username/following',function(req,res){
 	//console.log(req.params.username)
 	if(req.body.limit != null && req.body.limit != ""){
 		var params ={
-			TableName: "Following",
-			Limit : req.body.limit,
-			FilterExpression: "#user1 = :user1",
-			ExpressionAttributeNames:{
-				"#user1" : "user1"
-			},
-			ExpressionAttributeValues:{
-				":user1": req.params.username
-			}
+			'user1': req.params.username
 		}
-		docClient.scan(params,function(err, data){
+		mongoDB.collection('Follow').find(params, {'user2':1},{limit: req.body.limit}).toArray(function(err,records){
 			if(err){
-				console.log(err);
-			}else{
+				console.log(err)
+			}
+			else{
 				res.send({
-					status: "OK",
-					users: data.Items
+					status:"OK",
+					users: records
 				})
 			}
 		})
@@ -1364,24 +1383,17 @@ app.get('/user/:username/following',function(req,res){
 		})*/
 	}
 	else{
-				var params ={
-			TableName: "Following",
-			Limit : 50,
-			FilterExpression: "#user1 = :user1",
-			ExpressionAttributeNames:{
-				"#user1" : "user1"
-			},
-			ExpressionAttributeValues:{
-				":user1": req.params.username
-			}
+		var params ={
+			'user1': req.params.username
 		}
-		docClient.scan(params,function(err, data){
+		mongoDB.collection('Follow').find(params, {'user2':1},{limit: 50}).toArray(function(err,records){
 			if(err){
-				console.log(err);
-			}else{
+				console.log(err)
+			}
+			else{
 				res.send({
-					status: "OK",
-					users: data.Items
+					status:"OK",
+					users: records
 				})
 			}
 		})
@@ -1408,20 +1420,26 @@ app.post('/follow',function(req,res){
 	//console.log(req.body);
 	if(req.body.follow == true){
 		var params = {
-			TableName: "Following",
-			Item: {
-				"user1": req.session.user,
-				"user2": req.body.username
-			}
+			'user1': req.session.user,
+			'user2': req.body.username
 		};
-
-		docClient.put(params,function(err,data){
+		mongoDB.collection('Follow').insertOne(params, function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+				res.send({
+					status:"OK"
+				})
+			}
+		})
+		/*docClient.put(params,function(err,data){
 			if(err){
 				console.log(err);
 			}else{
 				res.send({status: "OK"});
 			}
-		})
+		})*/
 		//console.log("TRUE???")
 	/*cassandraClient.execute('INSERT INTO Following (User1, User2) VALUES (?, ?)', [req.session.user, req.body.username], function(err,result){
 		if(err){
@@ -1439,23 +1457,26 @@ app.post('/follow',function(req,res){
 	else{
 
 		var params = {
-			TableName: "Following",
-			Key:{
-				"user1": req.session.user
-			},
-			ConditionExpression: "user2 = :user2",
-			ExpressionAttributeValues:{
-				":user2": req.body.username
+			'user1': req.session.user,
+			'user2': req.body.username
+		};
+		mongoDB.collection('Follow').deleteMany(params, function(err,records){
+			if(err){
+				console.log(err)
 			}
-		}
-
-		docClient.delete(params, function(err,data){
+			else{
+				res.send({
+					status:"OK"
+				})
+			}
+		})
+		/*docClient.delete(params, function(err,data){
 			if(err){
 				console.log(err);
 			}else{
 				res.send({status: "OK"});
 			}
-		})
+		})*/
 		//console.log("FOLLOW IS NOT TRUE");
 		/*cassandraClient.execute('DELETE FROM Following WHERE User1 = ? AND User2 = ?', [req.session.user, req.body.username], function(err,result){
 			if(err){
@@ -1474,8 +1495,15 @@ app.post('/follow',function(req,res){
 app.post('/addmedia', function(req,res){
 
 
-	var id = crypto.createHash('md5').update(req.files.content.name+cryptoRandomString(10)).digest('hex');
-	var data = [id, req.files.content.data];
+	var id = crypto.createHash('md5').update(req.files.content.data).digest('hex');
+	var data = req.files.content.data;
+	console.log(id);
+	console.log(data);
+	chanRec.publish(exchange, 'add', data);
+	res.send({
+		status:"OK",
+		id: id
+	})
 	/*var params = {
 		TableName: "Media",
 		Item:{
@@ -1494,7 +1522,7 @@ app.post('/addmedia', function(req,res){
 			})
 		}
 	})*/
-	cassandraClient.execute('INSERT INTO media (id, content) VALUES (?, ?)',data, function(err, result){
+	/*cassandraClient.execute('INSERT INTO media (id, content) VALUES (?, ?)',data, function(err, result){
 		if(err){
 			res.send({
 				status: "error",
@@ -1507,7 +1535,7 @@ app.post('/addmedia', function(req,res){
 				id: id
 			});
 		}
-	})
+	})*/
 
 })
 
@@ -1555,6 +1583,6 @@ app.get('/media/:id',function(req,res){
 })
 
 
-app.listen(8080, "172.31.64.118",function(){
+app.listen(8080, "127.0.0.1",function(){
 	console.log("Server listening on port " + 9000);
 })
