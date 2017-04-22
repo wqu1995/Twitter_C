@@ -1186,7 +1186,7 @@ app.delete('/item/:id',function(req,res){
 		//console.log(records);
 		if(records.media !=null){
 			console.log(records.media)
-			chanDel.publish(exchange, 'delete', new Buffer("["+records.media.toString()+"]"));
+			chanDel.publish(exchange, 'delete', new Buffer("[\""+records.media.toString()+"\"]"));
 			mongoDB.collection('Tweets').deleteMany(find, function(err,records){
 				if(err){
 					console.log(err)
