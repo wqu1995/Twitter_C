@@ -1228,7 +1228,7 @@ app.delete('/item/:id',function(req,res){
 	}
 	mongoDB.collection('Tweets').findOne(find, function(err,records){
 
-		console.log(records);
+		//console.log(records);
 		if(records.media !=null){
 			//console.log(records.media)
 			//chanDel.publish(exchange, 'delete', new Buffer("[\""+records.media.toString()+"\"]"));
@@ -1699,14 +1699,16 @@ app.get('/media/:id',function(req,res){
 			})
 		}
 		else{
-			console.log(records.id);
+			//console.log(records.id);
 			if(records == null){
+				console.log(records);
 				res.send({
 				status: "error",
 				error: "no item found"
 			})
 			}
 			else{
+				console.log(records.id);
 				res.writeHead(200,{'content-type': 'image/png'});
 			res.write(new Buffer(records.content), 'binary');
 			res.end();
