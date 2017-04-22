@@ -20,14 +20,14 @@ var amqpConn, chanRec, chanDel;
 var exchange = 'twitter';
 var mongoDB;
 
-amqpRec.connect('amqp://test:test@52.3.230.248', function(err,conn){
+amqpRec.connect('amqp://test:test@54.236.241.144', function(err,conn){
 	amqpConn = conn;
 	chanRec = conn.createChannel(function(err,ch){
 		ch.assertExchange('twitter', 'direct');
 	})
 	console.log("connected to amqp");
 })
-amqpDel.connect('amqp://test:test@54.236.241.144', function(err,conn){
+amqpDel.connect('amqp://test:test@34.205.29.145', function(err,conn){
 	amqpConn = conn;
 	chanDel = conn.createChannel(function(err,ch){
 		ch.assertExchange('twitter', 'direct');
@@ -1587,6 +1587,6 @@ app.get('/media/:id',function(req,res){
 })
 
 
-app.listen(8080, "127.0.0.1",function(){
+app.listen(8080, "172.31.1.118",function(){
 	console.log("Server listening on port " + 9000);
 })
