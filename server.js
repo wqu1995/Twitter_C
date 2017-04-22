@@ -905,9 +905,73 @@ app.post('/searchTweets',function(req,res){
  	}
  })
 */
-app.post('/search',function(req,res){
-	console.log(req.body);
+var sort_by = function(field, reverse, primer){
+
+   var key = primer ? 
+       function(x) {return primer(x[field])} : 
+       function(x) {return x[field]};
+
+   reverse = !reverse ? 1 : -1;
+
+   return function (a, b) {
+       return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
+     } 
+}
+app.post('/search', function(req,res){
+	var newStamp = req.body.timestamp || dateTime;
+ 	var q = req.body.q;
+ 	var following = req.body.following;
+ 	var username = req.body.username;
+ 	var params;
+ 	if(req.body.limit != null && req.body.limit != "" && req.body.rank == 'time' 
+ 		&& req.body.replies == true && following == false && q == null){
+ 		params = {
+ 			TableName: "Tweets",
+ 			Limit : req.body.limit,
+ 			FilterExpression: "#timestamp <= :time",
+ 			ExpressionAttributeNames:{
+ 				"#timestamp" : "timestamp"
+ 			},
+ 			ExpressionAttributeValues:{
+ 				":time": newStamp
+ 			}
+ 		}
+ 		docClient.scan(params,function(err,data){
+ 			if(err){
+ 				console.log(err)
+ 			}
+ 			else{
+ 				res.send({
+ 					status: "OK",
+ 					items: data.Items.sort(sort_by('timestamp', true, parseInt))
+ 				})
+ 			}
+ 		})
+ 	}
 })
+app.post('/searchx',function(req,res){
+	console.log(req.body);
+	var params = {
+		TableName: "Tweets",
+		FilterExpression: "contains(#content, :content)",
+		ExpressionAttributeNames:{
+			"#content":"content"
+		},
+		ExpressionAttributeValues:{
+			":content": "hi"
+		}
+	}
+
+	docClient.scan(params, function(err, data){
+		if(err){
+			console.log(err)
+		}else{
+
+			console.log(data.Items.sort(sort_by('timestamp', true, parseInt)));
+		}
+	})
+})
+
 
 app.post('/item/:id/like',function(req,res){
 	//console.log('in here');
@@ -1488,6 +1552,6 @@ app.get('/media/:id',function(req,res){
 })
 
 
-app.listen(8080, "172.31.64.118",function(){
+app.listen(8080, "127.0.0.1",function(){
 	console.log("Server listening on port " + 9000);
 })
