@@ -578,7 +578,7 @@ app.get('/item/:id',function(req,res){
 		//	console.log(records)
 		if(records == null){
 			res.send({
-				status:"error";
+				status:"error",
 				error: "no item found"
 			})
 		}
