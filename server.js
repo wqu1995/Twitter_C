@@ -166,7 +166,7 @@ app.post('/adduser', function(req,res){
 			res.send({
 				status: "OK"
 			})
-			mongoDB.close();
+			//mongoDB.close();
 		}
 	})
 		
@@ -339,7 +339,7 @@ app.post('/verify',function(req,res){
 				console.log(err)
 			}
 			else{
-				console.log(records);
+				//console.log(records);
 				mongoDB.collection('Users').updateOne({'username':records.username}, update, function(err,result){
 					if(err){
 						console.log(err)
@@ -947,7 +947,7 @@ var sort_by = function(field, reverse, primer){
        return a = key(a), b = key(b), reverse * ((a > b) - (b > a));
      } 
 }
-app.post('/search', function(req,res){
+/*app.post('/search', function(req,res){
 	console.log(req.body);
 	var newStamp = req.body.timestamp || dateTime;
  	var q = req.body.q;
@@ -1001,6 +1001,10 @@ app.post('/searchx',function(req,res){
 			console.log(data.Items.sort(sort_by('timestamp', true, parseInt)));
 		}
 	})
+})*/
+app.post('/search', function(req,res){
+	console.log(req.body);
+
 })
 
 
@@ -1497,8 +1501,8 @@ app.post('/addmedia', function(req,res){
 
 	var id = crypto.createHash('md5').update(req.files.content.data).digest('hex');
 	var data = req.files.content.data;
-	console.log(id);
-	console.log(data);
+//	console.log(id);
+//	console.log(data);
 	chanRec.publish(exchange, 'add', data);
 	res.send({
 		status:"OK",
