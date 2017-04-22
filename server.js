@@ -503,7 +503,8 @@ var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString
 				console.log(err);
 			}else{
 				res.send({
-					status: "OK"
+					status: "OK",
+					id: postid
 				})
 			}
 		})
