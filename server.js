@@ -458,10 +458,17 @@ app.post('/additem', function(req,res){
 	else{
 
 var timestamp = Math.floor(dateTime/1000);	
-var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString(10)).digest('hex');
+//var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString(10)).digest('hex');
 		
-		var params;
-		if(req.body.parent != null && req.body.parent != ""){
+		var params = {
+			"content": req.body.content,
+						"username": req.session.user,
+						"timestamp": timestamp,
+						"parent": req.body.parent,
+						"media": req.body.media,
+						"likes": 0
+		};
+		/*if(req.body.parent != null && req.body.parent != ""){
 			if(req.body.media !=null && req.body.media != ""){
 			//	post = [postid,req.body.content,req.session.user,timestamp,req.body.parent,req.body.media.toString(),0]
 				params = {
@@ -513,7 +520,7 @@ var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString
 					}
 
 			}
-		}
+		}*/
 		mongoDB.collection('Tweets').insertOne(params, function(err,records){
 			if(err){
 				console.log(err)
@@ -1015,7 +1022,7 @@ app.post('/searchx',function(req,res){
 })*/
 app.post('/search', function(req,res){
 	var newStamp = req.body.timestamp || dateTime;
-	if(req.body.rank == 'time' && req.body.replies == true && req.body.following == false && req.body.limit == 100){
+	if(req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
 		var con = {
 			'timestamp':{ $lt: newStamp}
 		}
@@ -1044,6 +1051,35 @@ app.post('/search', function(req,res){
 			}
 		})
 
+	}
+	else if(req.body.username != null && req.body.rank != null &&req.body.limit !=null && req.body.replies == true && req.body.following == false){
+		var con = {
+			'timestamp': {$lt: newStamp},
+			'usernmae' : req.body.username
+		}
+		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,result){
+			if(err){
+				console.log(err)
+			}else{
+				var response = [];
+				for(var i = 0; i<records.length; i++){
+					var temp = {
+						id : records[i]._id,
+						content: records[i].content,
+						username: records[i].username,
+						timestamp: records[i].timestamp,
+						parent: records[i].parent,
+						media: records[i].media,
+						likes: records[i].likes
+					}
+					response.push(temp);
+				}
+				res.send({
+					status:"OK",
+					items:response
+				})
+			}
+		})
 	}
 	else{
 		console.log(req.body)
