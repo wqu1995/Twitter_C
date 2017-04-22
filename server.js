@@ -1597,7 +1597,8 @@ app.post('/addmedia', function(req,res){
 			}
 			else{
 				res.send({
-					status:"OK"
+					status:"OK",
+					id: id
 				})
 			}
 		})
