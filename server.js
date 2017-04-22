@@ -1022,7 +1022,7 @@ app.post('/searchx',function(req,res){
 app.post('/search', function(req,res){
 	var newStamp = req.body.timestamp || dateTime;
 	if(req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
-		console.log(1);
+		//console.log(1);
 		var con = {
 			'timestamp':{ $lt: newStamp}
 		}
@@ -1053,7 +1053,7 @@ app.post('/search', function(req,res){
 
 	}
 	else if(req.body.username != null && req.body.rank != null && req.body.limit !=null && req.body.replies == true && req.body.following == false){
-		console.log(2)
+		//console.log(2)
 		var con = {
 			'timestamp': {$lt: newStamp},
 			'username' : req.body.username
