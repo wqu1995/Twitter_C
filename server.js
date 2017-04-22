@@ -1013,9 +1013,22 @@ app.post('/search', function(req,res){
 				console.log(err)
 			}
 			else{
+				var response = [];
+				for(int i = 0; i<records.length; i++){
+					var temp = {
+						id : records[i]._id
+						content: records[i].content,
+						username: records[i].username,
+						timestamp: records[i].timestamp,
+						parent: records[i].parent,
+						media: records[i].media,
+						likes: records[i].likes
+					}
+					response.push(temp);
+				}
 				res.send({
 					status:"OK",
-					items:records
+					items:response
 				})
 			}
 		})
