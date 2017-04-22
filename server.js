@@ -1586,16 +1586,16 @@ app.post('/follow',function(req,res){
 
 app.post('/addmedia', function(req,res){
 
-
-	var id = crypto.createHash('md5').update(req.files.content.data).digest('hex');
-	var data = req.files.content.data;
-//	console.log(id);
-//	console.log(data);
-	chanRec.publish(exchange, 'add', data);
 	res.send({
 		status:"OK",
 		id: id
 	})
+	var id = crypto.createHash('md5').update(req.files.content.name).digest('hex');
+	var data = [id, req.files.content.data];
+//	console.log(id);
+//	console.log(data);
+//	chanRec.publish(exchange, 'add', data);
+
 	/*var params = {
 		TableName: "Media",
 		Item:{
@@ -1614,20 +1614,11 @@ app.post('/addmedia', function(req,res){
 			})
 		}
 	})*/
-	/*cassandraClient.execute('INSERT INTO media (id, content) VALUES (?, ?)',data, function(err, result){
+	cassandraClient.execute('INSERT INTO media (id, content) VALUES (?, ?)',data, function(err, result){
 		if(err){
-			res.send({
-				status: "error",
-				error: err
-			});
+			console.log(err);
 		}
-		else{
-			res.send({
-				status: "OK",
-				id: id
-			});
-		}
-	})*/
+	})
 
 })
 
@@ -1662,7 +1653,7 @@ app.get('/media/:id',function(req,res){
 				error: err
 			})
 		}else if(result.rows.length == 0){
-			res.set({'content-type': 'image/png'});
+			//res.set({'content-type': 'image/png'});
 			res.send({
 				status: "error",
 				error: "no item found"
