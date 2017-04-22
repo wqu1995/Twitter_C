@@ -1188,7 +1188,7 @@ app.delete('/item/:id',function(req,res){
 		if(records.media !=null){
 			//console.log(records.media)
 			//chanDel.publish(exchange, 'delete', new Buffer("[\""+records.media.toString()+"\"]"));
-			mongoDB.collection('media').deleteMany({'id':records.id[0]}, function(err,records){
+			mongoDB.collection('media').deleteMany({'id':records.media[0]}, function(err,records){
 				if(err){
 					console.log(err)
 				}else{
