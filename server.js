@@ -1083,6 +1083,50 @@ app.post('/search', function(req,res){
 			}
 		})
 	}
+	else if(req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == true && req.body.limit !=null){
+		var followCon = {
+			'user1' : req.session.user
+
+		}
+		var following = []
+		mongoDB.collection('Follow').find(followCon).limit(req.body.limit).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+				for(var i = 0; i<records.length; i++){
+					following.push(records[i].user2);
+				}
+				var params = {
+					'timestamp': {$lt: newStamp},
+					'username' : {$in : following}
+				}
+				mongoDB.collection('Tweets').find(params).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
+					if(err){
+						console.log(err)
+					}else{
+						var response = [];
+						for(var i = 0; i<records.length; i++){
+							var temp = {
+								id : records[i]._id,
+								content: records[i].content,
+								username: records[i].username,
+								timestamp: records[i].timestamp,
+								parent: records[i].parent,
+								media: records[i].media,
+								likes: records[i].likes
+							}
+							response.push(temp);
+						}
+						res.send({
+							status:"OK",
+							items:response
+						})
+					}
+				})
+			}
+		})
+	}
 	else{
 		console.log(req.body)
 	}
