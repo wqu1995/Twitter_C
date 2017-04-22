@@ -1003,7 +1003,24 @@ app.post('/searchx',function(req,res){
 	})
 })*/
 app.post('/search', function(req,res){
-	console.log(req.body);
+	var newStamp = req.body.timestamp || dateTime;
+	if(req.body.rank == 'time' && req.body.replies == true && req.body.following == false && req.body.limit == 100){
+		var con = {
+			'timestamp':{ $lt: newStamp}
+		}
+		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+				res.send({
+					status:"OK",
+					itmes:records
+				})
+			}
+		})
+
+	}
 
 })
 
@@ -1168,7 +1185,7 @@ app.get('/user/:username',function(req,res){
 			console.log(err)
 			
 		}else{
-			console.log(records)
+			//console.log(records)
 			following = records
 			var followercon = {
 		'user2': req.params.username
