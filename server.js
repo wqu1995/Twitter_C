@@ -919,6 +919,7 @@ var sort_by = function(field, reverse, primer){
      } 
 }
 app.post('/search', function(req,res){
+	console.log(req.body);
 	var newStamp = req.body.timestamp || dateTime;
  	var q = req.body.q;
  	var following = req.body.following;
