@@ -1058,7 +1058,7 @@ app.post('/search', function(req,res){
 			'timestamp': {$lt: newStamp},
 			'username' : req.body.username
 		}
-		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,result){
+		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}else{
