@@ -1405,21 +1405,21 @@ app.get('/user/:username',function(req,res){
 			var followingcon = {
 		'user1': req.params.username
 	}
-	mongoDB.collection('Users').find(followingcon).count(function(err,records){
+	mongoDB.collection('Users').find(followingcon).toArray(function(err,records){
 		if(err){
 			console.log(err)
 			
 		}else{
 			//console.log(records)
-			following = records
+			following = records.length
 			var followercon = {
 		'user2': req.params.username
 	}
-	mongoDB.collection('Users').find(followercon).count(function(err,records){
+	mongoDB.collection('Users').find(followercon).toArray(function(err,records){
 		if(err){
 			console.log(err)
 		}else{
-			follower = records;
+			follower = records.length;
 			var response = {
 								email : email,
 								followers : follower,
