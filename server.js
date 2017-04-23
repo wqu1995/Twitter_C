@@ -1264,6 +1264,7 @@ app.delete('/item/:id',function(req,res){
 	mongoDB.collection('Tweets').findOne(find, function(err,records){
 
 		//console.log(records);
+		if(records !=null){
 		if(records.media !=null){
 			//console.log(records.media)
 			//chanDel.publish(exchange, 'delete', new Buffer("[\""+records.media.toString()+"\"]"));
@@ -1285,6 +1286,7 @@ app.delete('/item/:id',function(req,res){
 			
 			
 		}
+	}
 	})
 	/*docClient.query(params, function(err,data){
 		if(err){
