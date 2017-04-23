@@ -457,9 +457,10 @@ app.post('/additem', function(req,res){
 	else{
 
 var timestamp = Math.floor(dateTime/1000);	
-//var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString(10)).digest('hex');
+var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString(10)).digest('hex');
 		
 		var params = {
+			"id": postid,
 			"content": req.body.content,
 						"username": req.session.user,
 						"timestamp": timestamp,
@@ -527,7 +528,7 @@ var timestamp = Math.floor(dateTime/1000);
 				//console.log(params._id)
 				res.send({
 					status:"OK",
-					id: params._id
+					id: postid
 				})
 			}
 		})
@@ -563,7 +564,7 @@ var timestamp = Math.floor(dateTime/1000);
 app.get('/item/:id',function(req,res){
 
 	var params = {
-		'_id': require('mongodb').ObjectId(req.params.id)
+		'id': req.params.id
 	}
 
 	/*docClient.query(params,function(err,data){
@@ -1032,22 +1033,10 @@ app.post('/search', function(req,res){
 				console.log(err)
 			}
 			else{
-				var response = [];
-				for(var i = 0; i<records.length; i++){
-					var temp = {
-						id : records[i]._id,
-						content: records[i].content,
-						username: records[i].username,
-						timestamp: records[i].timestamp,
-						parent: records[i].parent,
-						media: records[i].media,
-						likes: records[i].likes
-					}
-					response.push(temp);
-				}
+
 				res.send({
 					status:"OK",
-					items:response
+					items:records
 				})
 			}
 		})
@@ -1063,22 +1052,10 @@ app.post('/search', function(req,res){
 			if(err){
 				console.log(err)
 			}else{
-				var response = [];
-				for(var i = 0; i<records.length; i++){
-					var temp = {
-						id : records[i]._id,
-						content: records[i].content,
-						username: records[i].username,
-						timestamp: records[i].timestamp,
-						parent: records[i].parent,
-						media: records[i].media,
-						likes: records[i].likes
-					}
-					response.push(temp);
-				}
+				
 				res.send({
 					status:"OK",
-					items:response
+					items:records
 				})
 			}
 		})
@@ -1105,23 +1082,11 @@ app.post('/search', function(req,res){
 					if(err){
 						console.log(err)
 					}else{
-						var response = [];
-						for(var i = 0; i<records.length; i++){
-							var temp = {
-								id : records[i]._id,
-								content: records[i].content,
-								username: records[i].username,
-								timestamp: records[i].timestamp,
-								parent: records[i].parent,
-								media: records[i].media,
-								likes: records[i].likes
-							}
-							response.push(temp);
-						}
-						res.send({
-							status:"OK",
-							items:response
-						})
+						
+				res.send({
+					status:"OK",
+					items:records
+				})
 					}
 				})
 			}
@@ -1138,22 +1103,10 @@ app.post('/search', function(req,res){
 				console.log(err)
 			}
 			else{
-				var response = [];
-				for(var i = 0; i<records.length; i++){
-					var temp = {
-						id : records[i]._id,
-						content: records[i].content,
-						username: records[i].username,
-						timestamp: records[i].timestamp,
-						parent: records[i].parent,
-						media: records[i].media,
-						likes: records[i].likes
-					}
-					response.push(temp);
-				}
+				
 				res.send({
 					status:"OK",
-					items:response
+					items:records
 				})
 			}
 		})
@@ -1168,22 +1121,10 @@ app.post('/search', function(req,res){
 			if(err){
 				console.log(err)
 			}else{
-				var response = [];
-				for(var i = 0; i<records.length; i++){
-					var temp = {
-						id : records[i]._id,
-						content: records[i].content,
-						username: records[i].username,
-						timestamp: records[i].timestamp,
-						parent: records[i].parent,
-						media: records[i].media,
-						likes: records[i].likes
-					}
-					response.push(temp);
-				}
+				
 				res.send({
 					status:"OK",
-					items:response
+					items:records
 				})
 			}
 		})
@@ -1211,23 +1152,11 @@ app.post('/search', function(req,res){
 					if(err){
 						console.log(err)
 					}else{
-						var response = [];
-						for(var i = 0; i<records.length; i++){
-							var temp = {
-								id : records[i]._id,
-								content: records[i].content,
-								username: records[i].username,
-								timestamp: records[i].timestamp,
-								parent: records[i].parent,
-								media: records[i].media,
-								likes: records[i].likes
-							}
-							response.push(temp);
-						}
-						res.send({
-							status:"OK",
-							items:response
-						})
+						
+				res.send({
+					status:"OK",
+					items:records
+				})
 					}
 				})
 			}
@@ -1244,7 +1173,7 @@ app.post('/item/:id/like',function(req,res){
 	//console.log('in here');
 	if(req.body.like == true){
 		var con = {
-			'_id': require('mongodb').ObjectId(req.params.id)
+			'id': req.params.id
 		}
 		var update = {
 			$inc: {'likes': 1}
@@ -1284,7 +1213,7 @@ app.post('/item/:id/like',function(req,res){
 		})*/
 	}else if(req.body.like == false){
 		var con = {
-			'_id': require('mongodb').ObjectId(req.params.id)
+			'id': req.params.id
 		}
 		var update = {
 			$inc: {'likes': -1}
@@ -1330,7 +1259,7 @@ app.post('/item/:id/like',function(req,res){
 app.delete('/item/:id',function(req,res){
 
 	var find = {
-		'_id': require('mongodb').ObjectId(req.params.id)
+		'id': req.params.id
 	}
 	mongoDB.collection('Tweets').findOne(find, function(err,records){
 
