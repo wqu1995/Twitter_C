@@ -1405,7 +1405,7 @@ app.get('/user/:username',function(req,res){
 			var followingcon = {
 		'user1': req.params.username
 	}
-	mongoDB.collection('Users').find(followingcon).toArray(function(err,records){
+	mongoDB.collection('Follow').find(followingcon).toArray(function(err,records){
 		if(err){
 			console.log(err)
 			
@@ -1415,7 +1415,7 @@ app.get('/user/:username',function(req,res){
 			var followercon = {
 		'user2': req.params.username
 	}
-	mongoDB.collection('Users').find(followercon).toArray(function(err,records){
+	mongoDB.collection('Follow').find(followercon).toArray(function(err,records){
 		if(err){
 			console.log(err)
 		}else{
