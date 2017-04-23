@@ -1022,7 +1022,7 @@ app.post('/searchx',function(req,res){
 app.post('/search', function(req,res){
 	var newStamp = req.body.timestamp || dateTime;
 	//console.log(req.body)
-	if(req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
+	if(req.body.q == null && req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
 		//console.log(1);
 		var con = {
 			'timestamp':{ $lt: newStamp}
@@ -1053,7 +1053,7 @@ app.post('/search', function(req,res){
 		})
 
 	}
-	else if(req.body.username != null && req.body.rank != null && req.body.limit !=null && req.body.replies == true && req.body.following == false){
+	else if(req.body.q == null && req.body.username != null && req.body.rank != null && req.body.limit !=null && req.body.replies == true && req.body.following == false){
 		//console.log(2)
 		var con = {
 			'timestamp': {$lt: newStamp},
@@ -1083,7 +1083,7 @@ app.post('/search', function(req,res){
 			}
 		})
 	}
-	else if(req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == true && req.body.limit !=null){
+	else if(req.body.q == null &&req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == true && req.body.limit !=null){
 		var followCon = {
 			'user1' : req.session.user
 
@@ -1100,6 +1100,112 @@ app.post('/search', function(req,res){
 				var params = {
 					'timestamp': {$lt: newStamp},
 					'username' : {$in : following}
+				}
+				mongoDB.collection('Tweets').find(params).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
+					if(err){
+						console.log(err)
+					}else{
+						var response = [];
+						for(var i = 0; i<records.length; i++){
+							var temp = {
+								id : records[i]._id,
+								content: records[i].content,
+								username: records[i].username,
+								timestamp: records[i].timestamp,
+								parent: records[i].parent,
+								media: records[i].media,
+								likes: records[i].likes
+							}
+							response.push(temp);
+						}
+						res.send({
+							status:"OK",
+							items:response
+						})
+					}
+				})
+			}
+		})
+	}
+
+	else if(req.body.q != null && req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
+		var conn = {
+			'timestamp':{ $lt: newStamp},
+			$text: {$search: req.body.q}
+		}
+		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+				var response = [];
+				for(var i = 0; i<records.length; i++){
+					var temp = {
+						id : records[i]._id,
+						content: records[i].content,
+						username: records[i].username,
+						timestamp: records[i].timestamp,
+						parent: records[i].parent,
+						media: records[i].media,
+						likes: records[i].likes
+					}
+					response.push(temp);
+				}
+				res.send({
+					status:"OK",
+					items:response
+				})
+			}
+		})
+	}
+	else if(req.body.q != null && req.body.username != null && req.body.rank != null && req.body.limit !=null && req.body.replies == true && req.body.following == false){
+		var con = {
+			'timestamp': {$lt: newStamp},
+			'username' : req.body.username,
+			$text: {$search: req.body.q}
+		}
+		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}else{
+				var response = [];
+				for(var i = 0; i<records.length; i++){
+					var temp = {
+						id : records[i]._id,
+						content: records[i].content,
+						username: records[i].username,
+						timestamp: records[i].timestamp,
+						parent: records[i].parent,
+						media: records[i].media,
+						likes: records[i].likes
+					}
+					response.push(temp);
+				}
+				res.send({
+					status:"OK",
+					items:response
+				})
+			}
+		})
+	}
+	else if(req.body.q != null &&req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == true && req.body.limit !=null){
+		var followCon = {
+			'user1' : req.session.user
+
+		}
+		var following = []
+		mongoDB.collection('Follow').find(followCon).limit(req.body.limit).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+				for(var i = 0; i<records.length; i++){
+					following.push(records[i].user2);
+				}
+				var params = {
+					'timestamp': {$lt: newStamp},
+					'username' : {$in : following},
+					$text: {$search: req.body.q}
 				}
 				mongoDB.collection('Tweets').find(params).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 					if(err){
@@ -1230,7 +1336,7 @@ app.delete('/item/:id',function(req,res){
 
 		//console.log(records);
 		if(records.media !=null){
-			console.log(records.media)
+			//console.log(records.media)
 			//chanDel.publish(exchange, 'delete', new Buffer("[\""+records.media.toString()+"\"]"));
 			mongoDB.collection('media').deleteMany({'id':{$in : records.media}}, function(err,records){
 				if(err){
@@ -1701,14 +1807,14 @@ app.get('/media/:id',function(req,res){
 		else{
 			//console.log(records.id);
 			if(records == null){
-				console.log(records);
+			//	console.log(records);
 				res.send({
 				status: "error",
 				error: "no item found"
 			})
 			}
 			else{
-				console.log(records.id);
+			//	console.log(records.id);
 				res.writeHead(200,{'content-type': 'image/png'});
 			res.write(new Buffer(records.content), 'binary');
 			res.end();
