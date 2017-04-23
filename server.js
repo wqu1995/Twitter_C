@@ -20,7 +20,7 @@ var amqpConn, chanRec, chanDel;
 var exchange = 'twitter';
 var mongoDB;
 
-amqpRec.connect('amqp://test:test@54.236.241.144', function(err,conn){
+/*amqpRec.connect('amqp://test:test@54.236.241.144', function(err,conn){
 	amqpConn = conn;
 	chanRec = conn.createChannel(function(err,ch){
 		ch.assertExchange('twitter', 'direct');
@@ -43,7 +43,7 @@ var cassandraClient = new cassandra.Client({
 		console.log(err);
 	else
 		console.log("connected to cassandra")
-})
+})*/
 
 var url = 'mongodb://34.205.39.47:27017/Twitter';
 //var url = 'mongodb://localhost:27017/twitter';
