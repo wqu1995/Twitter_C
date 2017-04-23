@@ -11,7 +11,7 @@ var nodemailer = require('nodemailer');
 //var FileStore = require('session-file-store')(session);
 var mongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
-const dateTime = Date.now();
+//const dateTime = Date.now();
 var fileupload = require('express-fileupload');
 var cassandra = require('cassandra-driver');
 var amqpRec = require('amqplib/callback_api');
@@ -456,7 +456,7 @@ app.post('/additem', function(req,res){
 	}
 	else{
 
-var timestamp = Math.floor(dateTime/1000);	
+var timestamp = Math.floor(Date.now()/1000);	
 var postid = crypto.createHash('md5').update(req.body.content+cryptoRandomString(10)).digest('hex');
 		
 		var params = {
@@ -1021,7 +1021,7 @@ app.post('/searchx',function(req,res){
 	})
 })*/
 app.post('/search', function(req,res){
-	var newStamp = req.body.timestamp || dateTime;
+	var newStamp = req.body.timestamp || Date.now();
 	//console.log(req.body)
 	if(req.body.q == null && req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
 		//console.log(1);
