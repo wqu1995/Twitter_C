@@ -271,6 +271,7 @@ app.controller("mainCtrl",function($scope,$location,$http,$uibModal,srvShareData
 			console.log(res);
 				$http.post('/searchDefaultTweets').success(function(res){
 				console.log(res);
+				alert("you liked tweet "+id);
 				$scope.tweets = res.items;
 	})
 
@@ -286,6 +287,7 @@ app.controller("mainCtrl",function($scope,$location,$http,$uibModal,srvShareData
 		$http.post('/item/' + id + '/like',jsonToSend).success(function(res){
 			console.log(res)
 			$http.post('/searchDefaultTweets').success(function(res){
+				alert("you unliked tweet "+id);
 				console.log(res);
 				$scope.tweets = res.items;
 			})
@@ -370,21 +372,29 @@ app.controller("searchCtrl", function($scope,$location,$http,$uibModalInstance){
 			$scope.q = null;
 		if($scope.username === "")
 			$scope.username = null;
+		var replies;
+		if($scope.selectedReplies =="true"){
+			replies =true;
+		}
+		else{
+			replies = false;
+		}
 		
 		var data = {
 			timestamp : $scope.timestamp,
-			limit: $scope.limit,
+			limit: parseInt($scope.limit),
 			q: $scope.q,
 			username: $scope.username,
 			following: selection,
 			rank: $scope.selectedRanking,
 			parent: $scope.parent,
-			replies: $scope.selectedReplies
+			replies: replies
 		}
 		console.log("THIS IS DATA")
 		console.log(data);
 		$http.post('/search',data).success(function(res){
 			if(res.status == "OK"){
+				console.log("inadvanced");
 				console.log(res);
 				$uibModalInstance.close(res);
 			}

@@ -1061,14 +1061,15 @@ app.post('/searchDefaultTweets',function(req,res){
 
 app.post('/search', function(req,res){
 	var newStamp = req.body.timestamp || Date.now();
-	console.log(req.body);
+	//console.log(req.body);
 	//console.log(req.body)
 	if(req.body.q == null && req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
-		console.log(1);
+	//	console.log(1);
 		var con = {
 			'timestamp':{ $lt: newStamp}
 		}
-		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
+		if(req.body.rank == 'time'){
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}
@@ -1080,15 +1081,32 @@ app.post('/search', function(req,res){
 				})
 			}
 		})
+		}
+		else{
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+
+				res.send({
+					status:"OK",
+					items:records
+				})
+			}
+		})
+		}
+		
 
 	}
 	else if(req.body.q == null && req.body.username != null && req.body.rank != null && req.body.limit !=null && req.body.replies == true && req.body.following == false){
-		console.log(2)
+		//console.log(2)
 		var con = {
 			'timestamp': {$lt: newStamp},
 			'username' : req.body.username
 		}
-		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
+		if(req.body.rank == 'time'){
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}else{
@@ -1099,15 +1117,31 @@ app.post('/search', function(req,res){
 				})
 			}
 		})
+		}
+		else{
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}else{
+				
+				res.send({
+					status:"OK",
+					items:records
+				})
+			}
+		})
+		}
+		
 	}
 	else if(req.body.q == null &&req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == true && req.body.limit !=null){
-		console.log(3);
+		//console.log(3);
 		var followCon = {
 			'user1' : req.session.user
 
 		}
 		var following = []
-		mongoDB.collection('Follow').find(followCon).limit(req.body.limit).toArray(function(err,records){
+		if(req.body.rank == 'time'){
+			mongoDB.collection('Follow').find(followCon).limit(req.body.limit).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}
@@ -1132,15 +1166,60 @@ app.post('/search', function(req,res){
 				})
 			}
 		})
+		}
+		else{
+			mongoDB.collection('Follow').find(followCon).limit(req.body.limit).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+				for(var i = 0; i<records.length; i++){
+					following.push(records[i].user2);
+				}
+				var params = {
+					'timestamp': {$lt: newStamp},
+					'username' : {$in : following}
+				}
+				mongoDB.collection('Tweets').find(params).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+					if(err){
+						console.log(err)
+					}else{
+						
+				res.send({
+					status:"OK",
+					items:records
+				})
+					}
+				})
+			}
+		})
+		}
+		
 	}
 
 	else if(req.body.q != null && req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
-		console.log(4)
-		var conn = {
+	//	console.log(4)
+		var con = {
 			'timestamp':{ $lt: newStamp},
 			$text: {$search: req.body.q}
 		}
-		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
+		//console.log(conn)
+		if(req.body.rank == 'time'){
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+			//	console.log(records[0]);
+				res.send({
+					status:"OK",
+					items:records
+				})
+			}
+		})
+		}
+		else{
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}
@@ -1152,15 +1231,18 @@ app.post('/search', function(req,res){
 				})
 			}
 		})
+		}
+		
 	}
 	else if(req.body.q != null && req.body.username != null && req.body.rank != null && req.body.limit !=null && req.body.replies == true && req.body.following == false){
-		console.log(5)
+	//	console.log(5)
 		var con = {
 			'timestamp': {$lt: newStamp},
 			'username' : req.body.username,
 			$text: {$search: req.body.q}
 		}
-		mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
+		if(req.body.rank == 'time'){
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}else{
@@ -1171,15 +1253,31 @@ app.post('/search', function(req,res){
 				})
 			}
 		})
+		}
+		else{
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}else{
+				
+				res.send({
+					status:"OK",
+					items:records
+				})
+			}
+		})
+		}
+		
 	}
 	else if(req.body.q != null &&req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == true && req.body.limit !=null){
-		cnsole.log(6)
+	//	cnsole.log(6)
 		var followCon = {
 			'user1' : req.session.user
 
 		}
 		var following = []
-		mongoDB.collection('Follow').find(followCon).limit(req.body.limit).toArray(function(err,records){
+		if(req.body.rank == 'time'){
+			mongoDB.collection('Follow').find(followCon).limit(req.body.limit).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}
@@ -1205,6 +1303,36 @@ app.post('/search', function(req,res){
 				})
 			}
 		})
+		}
+		else{
+			mongoDB.collection('Follow').find(followCon).limit(req.body.limit).toArray(function(err,records){
+			if(err){
+				console.log(err)
+			}
+			else{
+				for(var i = 0; i<records.length; i++){
+					following.push(records[i].user2);
+				}
+				var params = {
+					'timestamp': {$lt: newStamp},
+					'username' : {$in : following},
+					$text: {$search: req.body.q}
+				}
+				mongoDB.collection('Tweets').find(params).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+					if(err){
+						console.log(err)
+					}else{
+						
+				res.send({
+					status:"OK",
+					items:records
+				})
+					}
+				})
+			}
+		})
+		}
+		
 	}
 	else{
 		console.log(req.body)
@@ -1714,7 +1842,7 @@ app.post('/follow',function(req,res){
 })
 
 app.post('/addmedia', function(req,res){
-	console.log("WAS CALLED");
+	//console.log("WAS CALLED");
 
 	var id = crypto.createHash('md5').update(req.files.content.name+cryptoRandomString(10)).digest('hex');
 	//var data = [id, req.files.content.data];
