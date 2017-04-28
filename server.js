@@ -45,7 +45,7 @@ var cassandraClient = new cassandra.Client({
 		console.log("connected to cassandra")
 })*/
 
-var url = 'mongodb://34.205.39.47:27017/Twitter';
+var url = 'mongodb://34.201.28.124:27017/Twitter';
 //var url = 'mongodb://localhost:27017/twitter';
 
 
@@ -182,7 +182,9 @@ app.post('/login', function(req,res){
 		'username': req.body.username,
 		'password': req.body.password
 	}
+	console.log(params);
 	mongoDB.collection('Users').findOne(params, function(err,records){
+		console.log(records);
 		if(records.enabled == false){
 			res.send({
 					status: "error",
@@ -1020,11 +1022,49 @@ app.post('/searchx',function(req,res){
 		}
 	})
 })*/
+
+app.post('/searchDefaultTweets',function(req,res){
+	var newStamp  = req.body.timestamp || Date.now();
+	var followCon = {
+		'user1': req.session.user
+	}
+	mongoDB.collection('Follow').find(followCon).toArray(function(err,records){
+	if(err){
+		console.log(err)
+	}
+	else{
+		console.log(records);
+		var following = [];
+		for(var i = 0; i<records.length; i++){
+			following.push(records[i].user2);
+		}
+	var query = {
+		timestamp:{
+			$lte:newStamp
+		},
+		username:{$in:following}
+	}
+	mongoDB.collection('Tweets').find(query).limit(10).sort({'timestamp':-1}).toArray(function(err,records1){
+		if(err){
+			console.log(err)
+		}
+		else{
+			res.send({
+				status:"OK",
+				items:records1
+			})
+		}
+	})	
+	}
+})
+})
+
 app.post('/search', function(req,res){
 	var newStamp = req.body.timestamp || Date.now();
+	console.log(req.body);
 	//console.log(req.body)
 	if(req.body.q == null && req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
-		//console.log(1);
+		console.log(1);
 		var con = {
 			'timestamp':{ $lt: newStamp}
 		}
@@ -1043,7 +1083,7 @@ app.post('/search', function(req,res){
 
 	}
 	else if(req.body.q == null && req.body.username != null && req.body.rank != null && req.body.limit !=null && req.body.replies == true && req.body.following == false){
-		//console.log(2)
+		console.log(2)
 		var con = {
 			'timestamp': {$lt: newStamp},
 			'username' : req.body.username
@@ -1061,6 +1101,7 @@ app.post('/search', function(req,res){
 		})
 	}
 	else if(req.body.q == null &&req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == true && req.body.limit !=null){
+		console.log(3);
 		var followCon = {
 			'user1' : req.session.user
 
@@ -1094,6 +1135,7 @@ app.post('/search', function(req,res){
 	}
 
 	else if(req.body.q != null && req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == false && req.body.limit !=null){
+		console.log(4)
 		var conn = {
 			'timestamp':{ $lt: newStamp},
 			$text: {$search: req.body.q}
@@ -1112,6 +1154,7 @@ app.post('/search', function(req,res){
 		})
 	}
 	else if(req.body.q != null && req.body.username != null && req.body.rank != null && req.body.limit !=null && req.body.replies == true && req.body.following == false){
+		console.log(5)
 		var con = {
 			'timestamp': {$lt: newStamp},
 			'username' : req.body.username,
@@ -1130,6 +1173,7 @@ app.post('/search', function(req,res){
 		})
 	}
 	else if(req.body.q != null &&req.body.username == null && req.body.rank != null && req.body.replies == true && req.body.following == true && req.body.limit !=null){
+		cnsole.log(6)
 		var followCon = {
 			'user1' : req.session.user
 
@@ -1670,7 +1714,7 @@ app.post('/follow',function(req,res){
 })
 
 app.post('/addmedia', function(req,res){
-
+	console.log("WAS CALLED");
 
 	var id = crypto.createHash('md5').update(req.files.content.name+cryptoRandomString(10)).digest('hex');
 	//var data = [id, req.files.content.data];
@@ -1683,6 +1727,7 @@ app.post('/addmedia', function(req,res){
 				console.log(err)
 			}
 			else{
+				console.log("SUCCESS");
 				res.send({
 					status:"OK",
 					id: id
@@ -1796,7 +1841,11 @@ app.get('/media/:id',function(req,res){
 
 })
 
-
+/*
 app.listen(8080, "172.31.1.118",function(){
+	console.log("Server listening on port " + 9000);
+})
+*/
+app.listen(9000, "0.0.0.0",function(){
 	console.log("Server listening on port " + 9000);
 })

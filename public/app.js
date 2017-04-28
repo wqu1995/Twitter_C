@@ -1,4 +1,4 @@
-var app = angular.module('app',['ui.router', 'ui.bootstrap', 'ngRoute']);
+var app = angular.module('app',['ui.router', 'ui.bootstrap', 'ngRoute','ngFileUpload']);
 
 
 app.config(["$routeProvider", "$locationProvider", function($routeProvider, $locationProvider){
@@ -30,14 +30,68 @@ app.config(['$urlRouterProvider','$stateProvider'],function($urlRouterProvider,$
 });*/
 
 
+app.controller("commentCtrl",function($scope,$location,$http,$uibModalInstance,srvShareData,Upload,tweet){
+	$scope.currentTweet = tweet;
+	$scope.ok = function(item){
+		var jsonToPost = {
+			content: $scope.tweet,
+			parent: $scope.currentTweet.id
+		};
+		
+		$http.post('/additem',jsonToPost).success(function(res){
+			if(res.status === "OK"){
+			 alert("Tweet id: "+res.id+ "was posted");
+			}
+			else{
+				alert("Fail");
+			}
+		})
+		if (item){
+		Upload.upload({
+			url:'/addmedia',
+			data:{
+				content: item
+			}
+		}).then(function(resp){
+			alert("MEDIA POSTED");
+			console.log(resp)
+		})
+	}
+	$uibModalInstance.close();
+}
 
+	$scope.cancel = function(){
+		$uibModalInstance.close();
+	}
+})
 
-app.controller("mainCtrl",function($scope,$location,$http,$uibModal,srvShareData){
+app.controller("mainCtrl",function($scope,$location,$http,$uibModal,srvShareData,Upload){
 
 	//$http.get('/getAllTweets').success(function(res){
 	//	$scope.tweets = res;
 	//})
 
+	$http.post('/searchDefaultTweets').success(function(res){
+		console.log(res);
+		$scope.tweets = res.items;
+	})
+
+
+	$scope.comment = function(tweet){
+		var modalInstance = $uibModal.open({
+			templateUrl: '/commentModal.html',
+			controller: 'commentCtrl',
+			resolve: {
+            tweet: function(){
+                        return tweet;
+                    }
+            }
+		})
+
+		modalInstance.result.then(function (data) {
+                $scope.tweets = data.items;
+            })
+	}
 
 	$scope.getItem = function(){
 		query = '/item/'+$scope.tweetId;
@@ -71,6 +125,8 @@ app.controller("mainCtrl",function($scope,$location,$http,$uibModal,srvShareData
 		})
 	}
 
+
+
 	$scope.logout = function(){
 		$http.post('/logout').success(function(res){
 			if(res.status === "OK"){
@@ -90,12 +146,12 @@ app.controller("mainCtrl",function($scope,$location,$http,$uibModal,srvShareData
 		})
 	}
 
-	$scope.additem = function(){
+	$scope.additem = function(file){
 			var jsonToPost = {
 			content: $scope.tweet,
 			parent: 'none'
 		};
-
+		
 		$http.post('/additem',jsonToPost).success(function(res){
 			if(res.status === "OK"){
 			 alert("Tweet id: "+res.id+ "was posted");
@@ -104,7 +160,18 @@ app.controller("mainCtrl",function($scope,$location,$http,$uibModal,srvShareData
 				alert("Fail");
 			}
 		})
+		if (file){
+		Upload.upload({
+			url:'/addmedia',
+			data:{
+				content: file
+			}
+		}).then(function(resp){
+			alert("MEDIA POSTED");
+			console.log(resp)
+		})
 	}
+}
 
 	$scope.follow = function(){
 		var jsonToPost = {
@@ -193,6 +260,39 @@ app.controller("mainCtrl",function($scope,$location,$http,$uibModal,srvShareData
 		})
 
 	}
+
+	$scope.likeTweet = function(tweet){
+		console.log("HIT LIKE TWEET")
+		var id = tweet.id;
+		var jsonToSend = {
+			like: true
+		}
+		$http.post('/item/' + id + '/like',jsonToSend).success(function(res){
+			console.log(res);
+				$http.post('/searchDefaultTweets').success(function(res){
+				console.log(res);
+				$scope.tweets = res.items;
+	})
+
+		})
+	}
+
+	$scope.unlikeTweet = function(tweet){
+		console.log("HIT UNLIKE TWEET")
+		var id = tweet.id
+		var jsonToSend = {
+			like: false
+		}
+		$http.post('/item/' + id + '/like',jsonToSend).success(function(res){
+			console.log(res)
+			$http.post('/searchDefaultTweets').success(function(res){
+				console.log(res);
+				$scope.tweets = res.items;
+			})
+
+		})
+	}
+
 })
 
 app.controller("loginCtrl",function($scope,$location,$http,$uibModal){
@@ -251,6 +351,8 @@ app.controller("adduserCtrl",function($scope,$location,$http, $uibModalInstance)
 
 app.controller("searchCtrl", function($scope,$location,$http,$uibModalInstance){
 	$scope.options = ["true", "false"];
+	$scope.rankOptions = ["time","interest"];
+	$scope.repliesOptions=["true","false"];
 	$scope.ok = function(){
 		var selection;
 		if ($scope.selectedFollowing == "true"){
@@ -274,7 +376,10 @@ app.controller("searchCtrl", function($scope,$location,$http,$uibModalInstance){
 			limit: $scope.limit,
 			q: $scope.q,
 			username: $scope.username,
-			following: selection
+			following: selection,
+			rank: $scope.selectedRanking,
+			parent: $scope.parent,
+			replies: $scope.selectedReplies
 		}
 		console.log("THIS IS DATA")
 		console.log(data);

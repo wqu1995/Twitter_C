@@ -35,6 +35,14 @@
         <p> Following: Only show tweets that you are following </p>
         <select ng-model="selectedFollowing" ng-options="x for x in options">
         </select>
+        <p> Rank : By Time or Interest </p>
+        <select ng-model="selectedRanking" ng-options="y for y in rankOptions">
+        </select>
+        <p> By Parent </p>
+        <input type="text" class="form-control" ng-model ="parent">
+        <p> By Replies </p>
+        <select ng-model="selectedReplies" ng-options="j for j in repliesOptions"></select>
+
     </div>
 
     </div>

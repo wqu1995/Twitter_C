@@ -8,10 +8,17 @@
 
 <title> Main Page </title>
 
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload-shim.js"></script> 
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/js/bootstrap.min.js" integrity="sha384-BLiI7JTZm+JWlgKa0M0kGRpJbF2J8q+qreVrKBC47e3K6BW78kGLrCkeRX6I9RoK" crossorigin="anonymous"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload.min.js"></script>
+
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.4.2/angular-ui-router.js"></script> 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.js"></script>
@@ -71,8 +78,13 @@
     <div class="col-md-6"> 
       <p>News Feed Column </p>
       <div class="container">
+        <form name="myForm">
         <textarea class="form-control" rows="3" placeholder="Write a tweet." ng-model = "tweet"></textarea>
-        <button type="button" id="tweetButton" class="btn btn-outline-primary" ng-click = "additem()"> Tweet </button>
+        <button class="btn btn-outline-primary" type="file" ngf-select ng-model="picFile" name="file" accept="image/*"> Choose File to Upload </button> 
+         <img ng-show="myForm.file.$valid" ngf-thumbnail="picFile" style="max-height: 200px; max-width:100px" class="thumb">
+         <button class="btn btn-outline-warning" ng-click="picFile = null" ng-show="picFile">Remove</button>
+        <button ng-disabled="!myForm.$valid" style="margin-bottom:10px"id="tweetButton" class="btn btn-outline-primary" ng-click = "additem(picFile)"> Tweet </button>
+        </form>
       </div>
       <hr>
       <p> Place for Tweets </p>
@@ -80,12 +92,18 @@
       <li class="list-group-item">
       <h6> {{tweet.username}} </h6>
       <p> {{tweet.content}} </p>
+      <p> Likes : {{tweet.likes}} </p>
+      <button type="button" class="btn btn-outline-secondary" ng-click="comment(tweet)"> Comment </button>
+      <button type="button" class="btn btn-outline-secondary" ng-click="likeTweet(tweet)"> Like </button>
+      <button type-"button" class="btn btn-outline-secondary" ng-click="unlikeTweet(tweet)"> Unlike </button>
       </li>
       <ul>
 </div>
 
 
-<div class="col-md-3"> <button type="button" class= "btn btn-outline-secondary" ng-click = "logout()"> LogOut </button>
+<div class="col-md-3"> 
+<div>
+<button type="button" class= "btn btn-outline-secondary" ng-click = "logout()"> LogOut </button>
  </div>
 </div>
 </body>

@@ -8,18 +8,13 @@
 
 <title> TwitterClone </title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload-shim.js"></script> 
+    
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/js/bootstrap.min.js" integrity="sha384-BLiI7JTZm+JWlgKa0M0kGRpJbF2J8q+qreVrKBC47e3K6BW78kGLrCkeRX6I9RoK" crossorigin="anonymous"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.4.2/angular-ui-router.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload.min.js"></script>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-sanitize.js"></script>
-    <script src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.3.0.js"></script>
     <script src="app.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
 <link rel="stylesheet" href="loginPageCSS.css">
@@ -27,19 +22,28 @@
 
 
 </head>
-  <body ng-app= "app">
-  <div class="wrapper" ng-controller="loginCtrl">
-    <form class="form-signin" >       
-      <h2 class="form-signin-heading"> Twitter!</h2>
-      <p id="loginInfo">{{loginInfo}}</p>
 
-      <input  type="text" class="form-control" ng-model="login.username" placeholder="User name" autofocus="" />
-      <input  type="password" class="form-control" ng-model="login.password" placeholder="Password" />      
-      <button class="btn btn-lg btn-primary btn-block form-control" ng-click = "login()">Login</button> 
-      <h6 style="margin-left: 153px"> or </h6>
-      <button class="btn btn-lg btn-primary btn-block form-control" ng-click="signUpButton()"> Sign Up </button> 
-    </form>
+<body ng-app="app">
+<div>
+        <div class="modal-header">
+            <h3 class="modal-title">Commenting on {{currentTweet.content}}</h3>
+        </div>
+    <div class="modal-body">
+        <form name="myForm">
+        <textarea class="form-control" rows="3" placeholder="Write a tweet." ng-model ="replyTweet"></textarea>
+        <button class="btn btn-outline-primary" type="file" ngf-select ng-model="picFile" name="file" accept="image/*"> Choose File to Upload </button> 
+         <img ng-show="myForm.file.$valid" ngf-thumbnail="picFile" style="max-height: 200px; max-width:100px" class="thumb">
+         <button class="btn btn-outline-warning" ng-click="picFile = null" ng-show="picFile">Remove</button>
+        </form>
+    </div>
 
-  </div>
+    </div>
+        <div class="modal-footer">
+            <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+                <button ng-disabled="!myForm.$valid" style="margin-bottom:10px" id="tweetButton" class="btn btn-primary" ng-click = "ok(picFile)"> Tweet </button>
+        </div>
+
+</div>
 </body>
+
 </html>
