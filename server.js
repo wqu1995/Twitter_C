@@ -19,7 +19,7 @@ var mongoDB;
 
 
 
-var url = 'mongodb://34.201.28.124:27017/Twitter';
+var url = 'mongodb://172.31.1.118:27017/Twitter';
 
 
 
@@ -102,7 +102,7 @@ app.post('/login', function(req,res){
 		'password': req.body.password
 	}
 	mongoDB.collection('Users').findOne(params, function(err,records){
-		console.log(records);
+		//console.log(records);
 		if(records.enabled == false){
 			res.send({
 					status: "error",
@@ -133,7 +133,7 @@ app.post('/logout',function(req,res){
 })
 
 app.get('/verify',function(req,res){
-	console.log("get+"+[req.query.email, req.query.key])
+	//console.log("get+"+[req.query.email, req.query.key])
 	if(req.query.key === 'abracadabra'){
 		cassandraClient.execute('SELECT username FROM Users WHERE email = ?',[req.query.email],function(err,result){
 			if(err){
