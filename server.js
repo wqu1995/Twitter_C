@@ -358,7 +358,7 @@ app.post('/search', function(req,res){
 		})
 		}
 		else{
-			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}
@@ -393,7 +393,7 @@ app.post('/search', function(req,res){
 		})
 		}
 		else{
-			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}else{
@@ -453,7 +453,7 @@ app.post('/search', function(req,res){
 					'timestamp': {$lt: newStamp},
 					'username' : {$in : following}
 				}
-				mongoDB.collection('Tweets').find(params).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+				mongoDB.collection('Tweets').find(params).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 					if(err){
 						console.log(err)
 					}else{
@@ -489,7 +489,7 @@ app.post('/search', function(req,res){
 		})
 		}
 		else{
-			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}
@@ -524,7 +524,7 @@ app.post('/search', function(req,res){
 		})
 		}
 		else{
-			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+			mongoDB.collection('Tweets').find(con).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 			if(err){
 				console.log(err)
 			}else{
@@ -586,7 +586,7 @@ app.post('/search', function(req,res){
 					'username' : {$in : following},
 					$text: {$search: req.body.q}
 				}
-				mongoDB.collection('Tweets').find(params).limit(req.body.limit).sort({'likes':-1}).toArray(function(err,records){
+				mongoDB.collection('Tweets').find(params).limit(req.body.limit).sort({'timestamp':-1}).toArray(function(err,records){
 					if(err){
 						console.log(err)
 					}else{
