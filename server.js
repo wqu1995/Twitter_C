@@ -40,7 +40,7 @@ var url1 = 'mongodb://172.31.1.118:27017/Media';
 
 
 
-mongoClient1.connect(url,function(err,db){
+mongoClient1.connect(url1,function(err,db){
 	if(err){
 		console.log(err)
 	}else{
