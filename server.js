@@ -8,6 +8,8 @@ var crypto = require('crypto');
 var cryptoRandomString = require('crypto-random-string');
 var nodemailer = require('nodemailer');
 var mongoClient = require('mongodb').MongoClient;
+var mongoClient1 = require('mongodb').MongoClient;
+
 var assert = require('assert');
 var fileupload = require('express-fileupload');
 var cassandra = require('cassandra-driver');
@@ -15,19 +17,11 @@ var amqpRec = require('amqplib/callback_api');
 var amqpDel = require('amqplib/callback_api');
 var amqpConn, chanRec, chanDel;
 var exchange = 'twitter';
-var mongoDB;
+var mongoDB mediaDB;
 
 
 
-var cassandraClient = new cassandra.Client({
-	contactPoints: ['52.3.230.248'],
-	keyspace: 'media'
-},function(err){
-	if(err)
-		console.log(err);
-	else
-		console.log("connected to cassandra")
-})
+
 
 var url = 'mongodb://172.31.1.118:27017/Twitter';
 
@@ -42,6 +36,18 @@ mongoClient.connect(url,function(err,db){
 	}
 	})
 
+var url1 = 'mongodb://172.31.1.118:27017/Media';
+
+
+
+mongoClient1.connect(url,function(err,db){
+	if(err){
+		console.log(err)
+	}else{
+		console.log("CONNECTION SUCCESS");
+		mediaDB = db;
+	}
+	})
 
 
 
@@ -544,46 +550,38 @@ app.post('/item/:id/like',function(req,res){
 	}
 })
 
-app.delete('/item/:id',function(req,res){
-
-	var find = {
-		'id': req.params.id
-	}
-	
-	mongoDB.collection('Tweets').findOne(find, function(err,records){
-
-		if(records !=null){
-		if(records.media !=null){
-			var i = 0;
-			for(i; i < records.media; i++){
-				cassandraClient.execute('DELETE FROM media WHERE id = ?', [records.media[i]], function(err,result){
-					if(err){
-						console.log(err);
-					}
-				})
-			}
-			if(i===records.media.length){
-				mongoDB.collection('Tweets').deleteMany(find, function(err,records){
-				if(err){
-					console.log(err)
-				}else{
-					res.send({
-						status:"OK"
-					})
-				}
-			})
-			}
-			
-			
-
-
-		}
-	}
-	})
-
-
-
-})
+ app.delete('/item/:id',function(req,res){
+ 
+ 	var find = {
+ 		'id': req.params.id
+ 	}
+ 	mongoDB.collection('Tweets').findOne(find, function(err,records){
+ 
+ 		if(records !=null){
+ 		if(records.media !=null){
+ 			mediaDB.collection('media').deleteMany({'id':{$in : records.media}}, function(err,records){
+ 				if(err){
+ 					console.log(err)
+ 				}else{
+ 					mongoDB.collection('Tweets').deleteMany(find, function(err,records){
+ 						if(err){
+ 							console.log(err)
+ 						}else{
+ 							res.send({
+ 								status:"OK"
+ 							})
+ 						}
+ 					})
+ 				}
+ 			})
+ 			
+ 			
+ 		}
+ 	}
+ 	})
+ 	
+ 
+ })
 
 app.get('/user/:username',function(req,res){
 	var email, follower, following;
@@ -753,52 +751,55 @@ app.post('/follow',function(req,res){
 	}
 })
 
-app.post('/addmedia', function(req,res){
-	//console.log("WAS CALLED");
-
-	var id = crypto.createHash('md5').update(req.files.content.name+cryptoRandomString(10)).digest('hex');
-	var data = [id, req.files.content.data];
-
-
-
-
-	cassandraClient.execute('INSERT INTO media (id, content) VALUES (?, ?)',data, function(err, result){
-		if(err){
-			console.log(err);
-		}else{
-				res.send({
-		status:"OK",
-		id: id
-	})
-		}
-	})
-
-})
-
-app.get('/media/:id',function(req,res){
-
-	var query = 'SELECT content FROM media WHERE id = ?';
-	var par = [req.params.id]
-	cassandraClient.execute(query, par, function(err,result){
-		if(err){
-			res.send({
-				status: "error",
-				error: err
-			})
-		}else if(result.rows.length == 0){
-			//res.set({'content-type': 'image/png'});
-			res.send({
-				status: "error",
-				error: "no item found"
-			})
-		}else{
-			res.writeHead(200,{'content-type': 'image/png'});
-			res.write(new Buffer(result.rows[0].content), 'binary');
-			res.end();
-		}
-	})
-
-})
+ app.post('/addmedia', function(req,res){
+ 
+ 	var id = crypto.createHash('md5').update(req.files.content.name+cryptoRandomString(10)).digest('hex');
+ 	var params = {
+ 			'id': id,
+ 			'content': req.files.content.data
+ 		};
+ 		mediaDB.collection('media').insertOne(params, function(err,records){
+ 			if(err){
+ 				console.log(err)
+ 			}
+ 			else{
+ 				res.send({
+ 					status:"OK",
+ 					id: id
+ 				})
+ 			}
+ 		})
+ 
+ 
+ })
+ 
+ app.get('/media/:id',function(req,res){
+ 	var params = {
+ 		'id': req.params.id
+ 	}
+ 	mediaDB.collection('media').findOne(params, function(err,records){
+ 		if(err){
+ 			res.send({
+ 				status: "error",
+ 				error: err
+ 			})
+ 		}
+ 		else{
+ 			if(records == null){
+ 				res.send({
+ 				status: "error",
+ 				error: "no item found"
+ 			})
+ 			}
+ 			else{
+ 				res.writeHead(200,{'content-type': 'image/png'});
+ 			res.write(new Buffer(records.content), 'binary');
+ 			res.end();
+ 				}
+ 		}
+ 	})
+ 
+ })
 
 
 app.listen(8080, "172.31.1.118",function(){
