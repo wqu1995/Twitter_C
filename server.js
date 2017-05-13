@@ -7,8 +7,8 @@ var session = require('cookie-session');
 var crypto = require('crypto');
 var cryptoRandomString = require('crypto-random-string');
 var nodemailer = require('nodemailer');
-var mongoClient = require('mongodb').MongoClient;
-var mongoClient1 = require('mongodb').MongoClient;
+var mongoClientT = require('mongodb').MongoClient;
+var mongoClientM = require('mongodb').MongoClient;
 
 var assert = require('assert');
 var fileupload = require('express-fileupload');
@@ -17,34 +17,35 @@ var amqpRec = require('amqplib/callback_api');
 var amqpDel = require('amqplib/callback_api');
 var amqpConn, chanRec, chanDel;
 var exchange = 'twitter';
-var mongoDB mediaDB;
+var mongoDB;
+var mediaDB;
 
 
 
 
 
-var url = 'mongodb://172.31.1.118:27017/Twitter';
+var urT = 'mongodb://172.31.1.118:27017/Twitter';
+var urR = 'mongodb://172.31.1.118:45000/Media';
 
 
-
-mongoClient.connect(url,function(err,db){
+mongoClientT.connect(urT,function(err,db){
 	if(err){
 		console.log(err)
 	}else{
-		console.log("CONNECTION SUCCESS");
+		console.log("CONNECTION SUCCESS to "+ urT);
 		mongoDB = db;
 	}
 	})
 
-var url1 = 'mongodb://172.31.1.118:27017/Media';
 
 
 
-mongoClient1.connect(url1,function(err,db){
+
+mongoClientM.connect(urR,function(err,db){
 	if(err){
 		console.log(err)
 	}else{
-		console.log("CONNECTION SUCCESS");
+		console.log("CONNECTION SUCCESS to " + urR);
 		mediaDB = db;
 	}
 	})
