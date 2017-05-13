@@ -554,14 +554,16 @@ app.delete('/item/:id',function(req,res){
 
 		if(records !=null){
 		if(records.media !=null){
-			for(var i = 0; i < records.media; i++){
+			var i = 0;
+			for(i; i < records.media; i++){
 				cassandraClient.execute('DELETE FROM media WHERE id = ?', [records.media[i]], function(err,result){
 					if(err){
 						console.log(err);
 					}
 				})
 			}
-			mongoDB.collection('Tweets').deleteMany(find, function(err,records){
+			if(i===records.media.length){
+				mongoDB.collection('Tweets').deleteMany(find, function(err,records){
 				if(err){
 					console.log(err)
 				}else{
@@ -570,6 +572,8 @@ app.delete('/item/:id',function(req,res){
 					})
 				}
 			})
+			}
+			
 			
 
 
