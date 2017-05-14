@@ -20,12 +20,8 @@ var exchange = 'twitter';
 var mongoDB;
 var mediaDB;
 
-
-
-
-
-var urT = 'mongodb://172.31.1.118:27017/Twitter';
-var urR = 'mongodb://172.31.1.118:45000/Media';
+var urT = 'mongodb://172.31.1.118:45000/Twitter';
+var urR = 'mongodb://172.31.1.118:45001/Media';
 
 
 mongoClientT.connect(urT,function(err,db){
