@@ -657,7 +657,10 @@ app.post('/item/:id/like',function(req,res){
 
 		mongoDB.collection('Tweets').updateOne(con, update, function(err,result){
 			if(err){
-				console.log(err)
+				res.send({
+					status: "error",
+					error: err
+				})
 			}else{
 				res.send({
 					status:"OK"
@@ -675,7 +678,10 @@ app.post('/item/:id/like',function(req,res){
 
 		mongoDB.collection('Tweets').updateOne(con, update, function(err,result){
 			if(err){
-				console.log(err)
+				res.send({
+					status: "error",
+					error: err
+				})
 			}else{
 				res.send({
 					status:"OK"
@@ -684,9 +690,7 @@ app.post('/item/:id/like',function(req,res){
 		})
 
 	}
-	else{
-		res.send("???")
-	}
+	
 })
 
 app.delete('/item/:id',function(req,res){
@@ -700,11 +704,17 @@ app.delete('/item/:id',function(req,res){
 			if(records.media !=null){
 				mediaDB.collection('media').deleteMany({'id':{$in : records.media}}, function(err,records){
 					if(err){
-						console.log(err)
+						res.send({
+							status: "error",
+							error: err
+						})
 					}else{
 						mongoDB.collection('Tweets').deleteMany(find, function(err,records){
 							if(err){
-								console.log(err)
+								res.send({
+									status: "error",
+									error: err
+								})
 							}else{
 								res.send({
 									status:"OK"
@@ -729,8 +739,10 @@ app.get('/user/:username',function(req,res){
 	}
 	mongoDB.collection('Users').findOne(params,function(err,records){
 		if(err){
-
-
+			res.send({
+				status: "error",
+				error: err
+			})
 		}else{
 			email = records.email;
 			var followingcon = {
@@ -738,7 +750,10 @@ app.get('/user/:username',function(req,res){
 			}
 			mongoDB.collection('Follow').find(followingcon).toArray(function(err,records){
 				if(err){
-					console.log(err)
+					res.send({
+						status: "error",
+						error: err
+					})
 
 				}else{
 					following = records.length
@@ -747,7 +762,10 @@ app.get('/user/:username',function(req,res){
 					}
 					mongoDB.collection('Follow').find(followercon).toArray(function(err,records){
 						if(err){
-							console.log(err)
+							res.send({
+								status: "error",
+								error: err
+							})
 						}else{
 							follower = records.length;
 							var response = {
@@ -781,7 +799,10 @@ app.get('/user/:username/followers',function(req,res){
 		}
 		mongoDB.collection('Follow').find(params, {'user1':1},{limit: req.body.limit}).toArray(function(err,records){
 			if(err){
-				console.log(err)
+				res.send({
+					status: "error",
+					error: err
+				})
 			}
 			else{
 				res.send({
@@ -799,7 +820,10 @@ app.get('/user/:username/followers',function(req,res){
 		}
 		mongoDB.collection('Follow').find(params, {'user1':1},{limit: 50}).toArray(function(err,records){
 			if(err){
-				console.log(err)
+				res.send({
+					status: "error",
+					error: err
+				})
 			}
 			else{
 				res.send({
@@ -818,7 +842,10 @@ app.get('/user/:username/following',function(req,res){
 		}
 		mongoDB.collection('Follow').find(params, {'user2':1},{limit: req.body.limit}).toArray(function(err,records){
 			if(err){
-				console.log(err)
+				res.send({
+					status: "error",
+					error: err
+				})
 			}
 			else{
 				res.send({
@@ -835,7 +862,10 @@ app.get('/user/:username/following',function(req,res){
 		}
 		mongoDB.collection('Follow').find(params, {'user2':1},{limit: 50}).toArray(function(err,records){
 			if(err){
-				console.log(err)
+				res.send({
+					status: "error",
+					error: err
+				})
 			}
 			else{
 				res.send({
@@ -860,7 +890,10 @@ app.post('/follow',function(req,res){
 		};
 		mongoDB.collection('Follow').insertOne(params, function(err,records){
 			if(err){
-				console.log(err)
+				res.send({
+					status: "error",
+					error: err
+				})
 			}
 			else{
 				res.send({
@@ -878,7 +911,10 @@ app.post('/follow',function(req,res){
 		};
 		mongoDB.collection('Follow').deleteMany(params, function(err,records){
 			if(err){
-				console.log(err)
+				res.send({
+					status: "error",
+					error: err
+				})
 			}
 			else{
 				res.send({
@@ -899,7 +935,10 @@ app.post('/addmedia', function(req,res){
 	};
 	mediaDB.collection('media').insertOne(params, function(err,records){
 		if(err){
-			console.log(err)
+			res.send({
+				status: "error",
+				error: err
+			})
 		}
 		else{
 			res.send({
